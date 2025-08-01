@@ -7,6 +7,7 @@ import Faqs from "../components/Faqs";
 import GamesSection from "../components/GamesSection";
 
 import AboutUs from "../components/AboutUs";
+import StakeNFTSection from "../components/StakeNFTSection";
 
 
 const Home = () => {
@@ -46,6 +47,8 @@ const Home = () => {
 
 				{/* About Us Section */}
 				<AboutUs />
+
+				<StakeNFTSection/>
 
 				{/* FAQs Section */}
 				<Faqs />
