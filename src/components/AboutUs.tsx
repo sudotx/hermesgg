@@ -1,5 +1,5 @@
 const AboutUs = () => {
-	const Stat = ({ value, label }:any) => (
+	const Stat = ({ value, label }: { value: string; label: string }) => (
 		<div>
 			<span className="block text-7xl font-bold text-white">{value}</span>
 			<span className="block text-gray-400">{label}</span>

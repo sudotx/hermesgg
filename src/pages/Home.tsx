@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import Footer from "../components/Footer";
 import LeftCard from "../components/LeftCard";
 import NavBar from "../components/NavBar";
@@ -36,9 +37,12 @@ const Home = () => {
 
 					{/* Explore Now Button */}
 					<div className="text-center mt-12">
-						<button className="bg-[#FFD600] text-black px-8 py-4 rounded-full font-bold text-lg hover:bg-[#FFD600]/90 transition-colors shadow-lg">
+						<Link
+							to="/app/coin-flip"
+							className="bg-[#FFD600] text-black px-8 py-4 rounded-full font-bold text-lg hover:bg-[#FFD600]/90 transition-colors shadow-lg"
+						>
 							Explore Now
-						</button>
+						</Link>
 					</div>
 				</div>
 

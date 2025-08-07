@@ -7,9 +7,10 @@ import { Toaster } from "react-hot-toast";
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import { WagmiProvider } from "wagmi";
 
-import { wagmiConfig } from "./src/config/wagmi";
-import { queryClient } from "./src/config/queryClient";
-import { Home, NotFound, CoinFlip, Crash, Mines, Plinko, Roulette, Dice } from './src/pages';
+import { AppLayout } from './components';
+import { queryClient } from "./config/queryClient";
+import { wagmiConfig } from "./config/wagmi";
+import { CoinFlip, Crash, Dice, Home, Mines, NotFound, Plinko, Roulette } from './pages';
 
 function App() {
   return (
@@ -21,12 +22,14 @@ function App() {
             <BrowserRouter>
               <Routes>
                 <Route path="/" element={<Home />} />
-                <Route path="/game/coinflip" element={<CoinFlip />} />
-                <Route path="/game/crash" element={<Crash />} />
-                <Route path="/game/mines" element={<Mines />} />
-                <Route path="/game/plinko" element={<Plinko />} />
-                <Route path="/game/roulette" element={<Roulette />} />
-                <Route path="/game/dice" element={<Dice />} />
+                <Route path="/app" element={<AppLayout />}>
+                  <Route path="coin-flip" element={<CoinFlip />} />
+                  <Route path="crash" element={<Crash />} />
+                  <Route path="mines" element={<Mines />} />
+                  <Route path="plinko" element={<Plinko />} />
+                  <Route path="roulette" element={<Roulette />} />
+                  <Route path="dice" element={<Dice />} />
+                </Route>
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </BrowserRouter>

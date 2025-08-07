@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { getGameData } from "../api";
+import { getGameData } from "../config";
 
 export const useGameData = (gameId: string) => {
   return useQuery({
