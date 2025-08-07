@@ -1,18 +1,20 @@
 // src/components/GameCard.jsx
 
 import clsx from 'clsx'; // A utility for conditionally joining class names
+import { Link } from 'react-router-dom';
 
 interface GameCardProps {
 	title?: string;
 	image?: string;
+	slug?: string;
 	isActive: boolean;
-	onClick?: () => void;
+	onMouseEnter?: () => void;
 }
 
-const GameCard = ({ title, image, isActive, onClick }: GameCardProps) => {
+const GameCard = ({ title, image, slug, isActive, onMouseEnter }: GameCardProps) => {
 	return (
         <div 
-            onClick={onClick}
+            onMouseEnter={onMouseEnter}
             className={clsx(
                 'relative w-64 h-80 rounded-2xl overflow-hidden cursor-pointer transition-all duration-500 ease-in-out',
                 {
@@ -51,9 +53,9 @@ const GameCard = ({ title, image, isActive, onClick }: GameCardProps) => {
                 {isActive ? (
                     <>
                         <h3 className="text-white text-2xl font-bold mb-4">{title}</h3>
-                        <button className="bg-black text-white text-lg font-semibold py-3 px-16 rounded-lg hover:bg-gray-800 transition-colors">
+                        <Link to={`/app/${slug}`} className="bg-black text-white text-lg font-semibold py-3 px-16 rounded-lg hover:bg-gray-800 transition-colors">
                             Play
-                        </button>
+                        </Link>
                         {/* Active Indicator Dot */}
                         <div className="absolute -bottom-5 w-3 h-3 bg-[#2FFF8A] rounded-full" />
                     </>

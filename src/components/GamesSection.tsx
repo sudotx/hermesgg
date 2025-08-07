@@ -9,10 +9,10 @@ import { ChevronLeft, ChevronRight } from 'lucide-react'; // Using icons for bet
 const GamesSection = () => {
     // NOTE: Make sure these image paths are correct for your project structure.
 	const games = [
-		{ title: "Crash", image: "https://res.cloudinary.com/dma1c8i6n/image/upload/v1754055246/20250711_0435_Rocket_s_Rise_simple_compose_01jzvhxecxf5wv1w8ct0345fks_ezq5eq.png" },
-		{ title: "Plinko", image: "https://res.cloudinary.com/dma1c8i6n/image/upload/v1754055244/20250711_0441_Electric_Plinko_Adventure_simple_compose_01jzvj9t_kiix7d.png" },
-		{ title: "Roulette", image: "https://res.cloudinary.com/dma1c8i6n/image/upload/v1754055253/20250711_0455_Dynamic_Roulette_Spin_simple_compose_01jzvk2a0af419z5s48sm52dqd_qins71.png" },
-		{ title: "Dice", image: "https://res.cloudinary.com/dma1c8i6n/image/upload/v1754055256/20250711_0436_Dynamic_Dice_Roll_simple_compose_01jzvj0xxpey0b1g9dxj01h7em_zemqds.png" },
+		{ title: "Crash", slug: "crash", image: "https://res.cloudinary.com/dma1c8i6n/image/upload/v1754055246/20250711_0435_Rocket_s_Rise_simple_compose_01jzvhxecxf5wv1w8ct0345fks_ezq5eq.png" },
+		{ title: "Plinko", slug: "plinko", image: "https://res.cloudinary.com/dma1c8i6n/image/upload/v1754055244/20250711_0441_Electric_Plinko_Adventure_simple_compose_01jzvj9t_kiix7d.png" },
+		{ title: "Roulette", slug: "roulette", image: "https://res.cloudinary.com/dma1c8i6n/image/upload/v1754055253/20250711_0455_Dynamic_Roulette_Spin_simple_compose_01jzvk2a0af419z5s48sm52dqd_qins71.png" },
+		{ title: "Dice", slug: "dice", image: "https://res.cloudinary.com/dma1c8i6n/image/upload/v1754055256/20250711_0436_Dynamic_Dice_Roll_simple_compose_01jzvj0xxpey0b1g9dxj01h7em_zemqds.png" },
 	];
 
     // State to track the active game card, defaulting to Roulette (index 2)
@@ -44,8 +44,9 @@ const GamesSection = () => {
                             key={game.title} 
                             title={game.title} 
                             image={game.image} 
+							slug={game.slug}
                             isActive={index === activeIndex}
-                            onClick={() => setActiveIndex(index)}
+                            onMouseEnter={() => setActiveIndex(index)}
                         />
                     ))}
                 </div>

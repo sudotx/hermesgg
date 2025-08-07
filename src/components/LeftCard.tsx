@@ -1,3 +1,5 @@
+import { Link } from "react-router-dom";
+
 const LeftCard = () => {
 	return (
 		<div className="relative w-full h-[600px] flex flex-row shadow-lg overflow-hidden items-stretch">
@@ -33,9 +35,12 @@ const LeftCard = () => {
 					Qorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc vulputate libero et
 				</p>
 				<div className="flex gap-3 mt-2">
-					<button className="bg-black text-white rounded-full px-12 py-5 text-2xl font-bold flex items-center shadow-lg hover:bg-gray-800 transition-all">
+					<Link
+						to="/app"
+						className="bg-black text-white rounded-full px-12 py-5 text-2xl font-bold flex items-center shadow-lg hover:bg-gray-800 transition-all"
+					>
 						Explore Now
-					</button>
+					</Link>
 					<button className="bg-black text-white rounded-full w-16 h-16 flex items-center justify-center shadow-lg text-3xl hover:bg-gray-800 transition-all">
 						↗
 					</button>
