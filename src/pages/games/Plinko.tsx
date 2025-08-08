@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import BetsList from "../../components/BetsList";
 import GameNavbar from "../../components/GameNavbar";
 import PlayersList from "../../components/PlayersList";
@@ -18,37 +18,40 @@ const mockBets = [
   { id: 3, game: "Plinko", username: "haargpooolnt", avatar: "👤", bet: "1.0851361", multiplier: "8.4x", payout: "1.0851361" },
 ];
 
-// Mock multiplier results
-// const multiplierResults = [
-//   { value: "2.2x", color: "green" },
-//   { value: "2.2x", color: "green" },
-//   { value: "2.8x", color: "blue" },
-//   { value: "2.8x", color: "blue" },
-//   { value: "2.8x", color: "yellow" },
-//   { value: "2.8x", color: "yellow" },
-//   { value: "1.8x", color: "purple" },
-//   { value: "1.8x", color: "purple" },
-// ];
+type Difficulty = "easy" | "medium" | "hard";
 
 const Plinko = () => {
-  const [betAmount, setBetAmount] = useState("6.83241");
-  const [difficulty, setDifficulty] = useState("easy");
-  const [rows, setRows] = useState(2);
+  const [betAmount, setBetAmount] = useState("10.00");
+  const [betMode, setBetMode] = useState<"manual" | "auto">("manual");
+  const [difficulty, setDifficulty] = useState<Difficulty>("easy");
+  const [rows, setRows] = useState(8);
+  const [isBetting, setIsBetting] = useState(false);
 
-//   const getColorClasses = (color: string) => {
-//     switch (color) {
-//       case "green":
-//         return "bg-green-500 text-white";
-//       case "blue":
-//         return "bg-blue-500 text-white";
-//       case "yellow":
-//         return "bg-yellow-500 text-black";
-//       case "purple":
-//         return "bg-purple-500 text-white";
-//       default:
-//         return "bg-gray-500 text-white";
-//     }
-//   };
+  const handleHalfBet = () => setBetAmount((prev) => (parseFloat(prev) / 2).toFixed(2));
+  const handleDoubleBet = () => setBetAmount((prev) => (parseFloat(prev) * 2).toFixed(2));
+
+  const handlePlaceBet = () => {
+    if (isBetting) return;
+    console.log(`Placing a ${betAmount} bet on ${difficulty} with ${rows} rows.`);
+    // Here you would trigger the ball drop animation and game logic
+    setIsBetting(true);
+    // Simulate game finishing after a few seconds
+    setTimeout(() => setIsBetting(false), 3000);
+  };
+
+  const difficultyMultipliers = useMemo(() => {
+    // These would be the actual multipliers for each slot at the bottom
+    switch (difficulty) {
+      case "easy":
+        return [10, 5, 2, 1.5, 1, 0.5, 1, 1.5, 2, 5, 10].slice(0, rows + 1);
+      case "medium":
+        return [20, 8, 3, 2, 1, 0.2, 1, 2, 3, 8, 20].slice(0, rows + 1);
+      case "hard":
+        return [100, 15, 5, 2, 1, 0.1, 1, 2, 5, 15, 100].slice(0, rows + 1);
+      default:
+        return [];
+    }
+  }, [difficulty, rows]);
 
   return (
     <div className="flex flex-col h-screen bg-neutral-900 text-white">
@@ -61,10 +64,16 @@ const Plinko = () => {
           {/* Betting Controls */}
           <div className="mb-6">
             <div className="flex mb-4">
-              <button className="flex-1 bg-neutral-700 px-4 py-2 rounded-l text-sm font-medium">
+              <button
+                onClick={() => setBetMode("manual")}
+                className={cn("flex-1 px-4 py-2 rounded-l text-sm font-medium", betMode === "manual" ? "bg-neutral-700" : "bg-neutral-800 text-gray-400")}
+              >
                 Manual
               </button>
-              <button className="flex-1 bg-neutral-800 px-4 py-2 rounded-r text-sm text-gray-400">
+              <button
+                onClick={() => setBetMode("auto")}
+                className={cn("flex-1 px-4 py-2 rounded-r text-sm", betMode === "auto" ? "bg-neutral-700" : "bg-neutral-800 text-gray-400")}
+              >
                 Auto
               </button>
             </div>
@@ -79,13 +88,16 @@ const Plinko = () => {
                     type="text"
                     value={betAmount}
                     onChange={(e) => setBetAmount(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2 bg-neutral-700 rounded text-white"
+                    disabled={isBetting}
+                    className="w-full pl-10 pr-4 py-2 bg-neutral-700 rounded text-white disabled:opacity-50"
                   />
                 </div>
-                <button className="px-3 py-2 bg-neutral-700 rounded text-sm">10k</button>
-                <button className="px-3 py-2 bg-neutral-700 rounded text-sm">100k</button>
-                <button className="px-3 py-2 bg-neutral-700 rounded text-sm">1/2</button>
-                <button className="px-3 py-2 bg-green-600 rounded text-sm">x2</button>
+                <button onClick={handleHalfBet} disabled={isBetting} className="px-3 py-2 bg-neutral-700 rounded text-sm disabled:opacity-50">
+                  1/2
+                </button>
+                <button onClick={handleDoubleBet} disabled={isBetting} className="px-3 py-2 bg-green-600 rounded text-sm disabled:opacity-50">
+                  x2
+                </button>
               </div>
             </div>
 
@@ -93,30 +105,24 @@ const Plinko = () => {
             <div className="mb-4">
               <label className="block text-sm text-gray-400 mb-2">Difficulty</label>
               <div className="grid grid-cols-3 gap-2">
-                <button 
-                  className={cn(
-                    "px-4 py-2 rounded text-sm font-medium",
-                    difficulty === "easy" ? "bg-green-600 text-white" : "bg-neutral-700 text-gray-300"
-                  )}
+                <button
+                  className={cn("px-4 py-2 rounded text-sm font-medium", difficulty === "easy" ? "bg-green-600 text-white" : "bg-neutral-700 text-gray-300")}
                   onClick={() => setDifficulty("easy")}
+                  disabled={isBetting}
                 >
                   Easy
                 </button>
-                <button 
-                  className={cn(
-                    "px-4 py-2 rounded text-sm font-medium",
-                    difficulty === "medium" ? "bg-yellow-600 text-black" : "bg-neutral-700 text-gray-300"
-                  )}
+                <button
+                  className={cn("px-4 py-2 rounded text-sm font-medium", difficulty === "medium" ? "bg-yellow-600 text-black" : "bg-neutral-700 text-gray-300")}
                   onClick={() => setDifficulty("medium")}
+                  disabled={isBetting}
                 >
                   Medium
                 </button>
-                <button 
-                  className={cn(
-                    "px-4 py-2 rounded text-sm font-medium",
-                    difficulty === "hard" ? "bg-red-600 text-white" : "bg-neutral-700 text-gray-300"
-                  )}
+                <button
+                  className={cn("px-4 py-2 rounded text-sm font-medium", difficulty === "hard" ? "bg-red-600 text-white" : "bg-neutral-700 text-gray-300")}
                   onClick={() => setDifficulty("hard")}
+                  disabled={isBetting}
                 >
                   Hard
                 </button>
@@ -131,14 +137,12 @@ const Plinko = () => {
                   <div className="w-4 h-1 bg-white rounded"></div>
                 </div>
                 <div className="flex space-x-1">
-                  {[2, 8, 10, 12, 14, 16, 18].map((row) => (
+                  {[8, 10, 12, 14, 16].map((row) => (
                     <button
                       key={row}
-                      className={cn(
-                        "px-2 py-1 rounded text-xs",
-                        rows === row ? "bg-blue-600 text-white" : "bg-neutral-700 text-gray-300"
-                      )}
+                      className={cn("px-2 py-1 rounded text-xs", rows === row ? "bg-blue-600 text-white" : "bg-neutral-700 text-gray-300")}
                       onClick={() => setRows(row)}
+                      disabled={isBetting}
                     >
                       {row}
                     </button>
@@ -147,8 +151,12 @@ const Plinko = () => {
               </div>
             </div>
 
-            <button className="w-full bg-yellow-500 text-black font-bold py-3 rounded-full text-lg">
-              Place Bet
+            <button
+              onClick={handlePlaceBet}
+              disabled={isBetting}
+              className="w-full bg-yellow-500 text-black font-bold py-3 rounded-full text-lg disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isBetting ? "Betting..." : "Place Bet"}
             </button>
           </div>
 
@@ -156,8 +164,27 @@ const Plinko = () => {
         </div>
 
         {/* Right Panel - Plinko Game Visualization */}
-        <div className="flex-1 bg-gradient-to-br relative overflow-hidden">
-          <img src="../../../public/game.png" alt="" />
+        <div className="flex-1 bg-gradient-to-br relative overflow-hidden flex items-center justify-center">
+          <div className="flex flex-col items-center">
+            {/* This is a simplified representation. A real implementation would use absolute positioning and more complex logic for the pegs. */}
+            <div className="relative w-full max-w-md mx-auto">
+              {Array.from({ length: rows }).map((_, i) => (
+                <div key={i} className="flex justify-center" style={{ marginBottom: "-10px" }}>
+                  {Array.from({ length: i + 2 }).map((__, j) => (
+                    <div key={j} className="w-4 h-4 bg-gray-500 rounded-full m-2" />
+                  ))}
+                </div>
+              ))}
+            </div>
+            <div className="flex mt-4">
+              {difficultyMultipliers.map((multiplier, index) => (
+                <div key={index} className="px-3 py-1 bg-blue-600 text-white text-xs font-semibold rounded-md mx-1">
+                  {multiplier}x
+                </div>
+              ))}
+            </div>
+          </div>
+          <img src="../../../public/game.png" alt="" className="absolute inset-0 w-full h-full object-cover opacity-10" />
         </div>
       </div>
 
