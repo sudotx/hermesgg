@@ -2438,14 +2438,9 @@ clsx@1.2.1, clsx@^1.2.1:
   resolved "https://registry.npmjs.org/clsx/-/clsx-1.2.1.tgz"
   integrity sha512-EcR6r5a8bj6pu3ycsa/E/cKVGuTgZJZdsyUYHOksG/UHIiKfjxzRxYJpyVBwYaQeOvghal9fcc4PidlgzugAQg==
 
-clsx@2.1.1:
+clsx@2.1.1, clsx@^2.1.1:
   version "2.1.1"
   resolved "https://registry.npmjs.org/clsx/-/clsx-2.1.1.tgz"
-  integrity sha512-eYm0QWBtUrBWZWG0d386OGAw16Z995PiOVo2B7bjWSbHedGl5e0ZWaq65kOGgUSNesEIDkB9ISbTg/JK9dhCZA==
-
-clsx@^2.1.1:
-  version "2.1.1"
-  resolved "https://registry.yarnpkg.com/clsx/-/clsx-2.1.1.tgz#eed397c9fd8bd882bfb18deab7102049a2f32999"
   integrity sha512-eYm0QWBtUrBWZWG0d386OGAw16Z995PiOVo2B7bjWSbHedGl5e0ZWaq65kOGgUSNesEIDkB9ISbTg/JK9dhCZA==
 
 color-convert@^2.0.1:
@@ -2553,6 +2548,11 @@ cuer@0.0.2:
   integrity sha512-MG1BYnnSLqBnO0dOBS1Qm/TEc9DnFa9Sz2jMA24OF4hGzs8UuPjpKBMkRPF3lrpC+7b3EzULwooX9djcvsM8IA==
   dependencies:
     qr "~0"
+
+daisyui@^5.0.50:
+  version "5.0.50"
+  resolved "https://registry.yarnpkg.com/daisyui/-/daisyui-5.0.50.tgz#764da931c9cdad22114e054c8af6d410326cc226"
+  integrity sha512-c1PweK5RI1C76q58FKvbS4jzgyNJSP6CGTQ+KkZYzADdJoERnOxFoeLfDHmQgxLpjEzlYhFMXCeodQNLCC9bow==
 
 date-fns@^2.29.3:
   version "2.30.0"

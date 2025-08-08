@@ -1,30 +1,27 @@
-// src/components/GamesSection.jsx
-
-import { useState } from 'react';
-import GameCard from './GameCard';
 import { ChevronLeft, ChevronRight } from 'lucide-react'; // Using icons for better quality
-
-// --- Component ---
+import { useMemo, useState, useCallback } from 'react';
+import GameCard from './GameCard';
 
 const GamesSection = () => {
-    // NOTE: Make sure these image paths are correct for your project structure.
-	const games = [
+	const initialGames = useMemo(() => [
 		{ title: "Crash", slug: "crash", image: "https://res.cloudinary.com/dma1c8i6n/image/upload/v1754055246/20250711_0435_Rocket_s_Rise_simple_compose_01jzvhxecxf5wv1w8ct0345fks_ezq5eq.png" },
 		{ title: "Plinko", slug: "plinko", image: "https://res.cloudinary.com/dma1c8i6n/image/upload/v1754055244/20250711_0441_Electric_Plinko_Adventure_simple_compose_01jzvj9t_kiix7d.png" },
 		{ title: "Roulette", slug: "roulette", image: "https://res.cloudinary.com/dma1c8i6n/image/upload/v1754055253/20250711_0455_Dynamic_Roulette_Spin_simple_compose_01jzvk2a0af419z5s48sm52dqd_qins71.png" },
+		{ title: "CoinFlip", slug: "coinflip", image: "https://res.cloudinary.com/dma1c8i6n/image/upload/v1754055256/20250711_0436_Dynamic_Dice_Roll_simple_compose_01jzvj0xxpey0b1g9dxj01h7em_zemqds.png" },
+		{ title: "Mines", slug: "mines", image: "https://res.cloudinary.com/dma1c8i6n/image/upload/v1754055256/20250711_0436_Dynamic_Dice_Roll_simple_compose_01jzvj0xxpey0b1g9dxj01h7em_zemqds.png" },
 		{ title: "Dice", slug: "dice", image: "https://res.cloudinary.com/dma1c8i6n/image/upload/v1754055256/20250711_0436_Dynamic_Dice_Roll_simple_compose_01jzvj0xxpey0b1g9dxj01h7em_zemqds.png" },
-	];
+	], []);
 
-    // State to track the active game card, defaulting to Roulette (index 2)
-	const [activeIndex, setActiveIndex] = useState(2);
+	const [games, setGames] = useState(initialGames);
+	const activeIndex = Math.floor((games.length - 1) / 2);
 
-	const handlePrev = () => {
-		setActiveIndex((prevIndex) => (prevIndex - 1 + games.length) % games.length);
-	};
+	const handlePrev = useCallback(() => {
+		setGames(prevGames => [prevGames[prevGames.length - 1], ...prevGames.slice(0, prevGames.length - 1)]);
+	}, []);
 
-	const handleNext = () => {
-		setActiveIndex((prevIndex) => (prevIndex + 1) % games.length);
-	};
+	const handleNext = useCallback(() => {
+		setGames(prevGames => [...prevGames.slice(1), prevGames[0]]);
+	}, []);
 
 	return (
 		<div className="w-full py-12 flex items-center justify-center">
@@ -41,12 +38,11 @@ const GamesSection = () => {
                 <div className="flex gap-4 items-center justify-center">
                     {games.map((game, index) => (
                         <GameCard 
-                            key={game.title} 
+                            key={game.slug} 
                             title={game.title} 
                             image={game.image} 
 							slug={game.slug}
                             isActive={index === activeIndex}
-                            onMouseEnter={() => setActiveIndex(index)}
                         />
                     ))}
                 </div>
