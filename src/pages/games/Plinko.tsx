@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import BetsList from "../../components/BetsList";
 import GameNavbar from "../../components/GameNavbar";
 import PlayersList from "../../components/PlayersList";
@@ -38,20 +38,6 @@ const Plinko = () => {
 		// Simulate game finishing after a few seconds
 		setTimeout(() => setIsBetting(false), 3000);
 	};
-
-	const difficultyMultipliers = useMemo(() => {
-		// These would be the actual multipliers for each slot at the bottom
-		switch (difficulty) {
-			case "easy":
-				return [10, 5, 2, 1.5, 1, 0.5, 1, 1.5, 2, 5, 10].slice(0, rows + 1);
-			case "medium":
-				return [20, 8, 3, 2, 1, 0.2, 1, 2, 3, 8, 20].slice(0, rows + 1);
-			case "hard":
-				return [100, 15, 5, 2, 1, 0.1, 1, 2, 5, 15, 100].slice(0, rows + 1);
-			default:
-				return [];
-		}
-	}, [difficulty, rows]);
 
 	return (
 		<div className="flex flex-col h-screen bg-neutral-900 text-white">
