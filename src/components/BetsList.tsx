@@ -1,4 +1,4 @@
-import { ChevronDown, TrendingUp } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 
 interface Bet {
   id: number;
@@ -16,64 +16,98 @@ interface BetsListProps {
 
 const BetsList: React.FC<BetsListProps> = ({ bets }) => {
   return (
-    <div className="bg-neutral-800 p-4">
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-bold">Bets</h2>
-        <div className="flex items-center space-x-2 text-gray-400">
+    <div className="bg-gradient-to-b from-gray-900 to-black p-6">
+      {/* Header Section */}
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-2xl font-bold text-white">Bets</h2>
+        <div className="flex items-center space-x-2 text-white text-sm cursor-pointer">
           <span>All Bets</span>
           <ChevronDown className="w-4 h-4" />
         </div>
       </div>
 
-      <div className="overflow-x-auto">
-        <table className="w-full">
-          <thead>
-            <tr className="text-left text-sm text-gray-400 border-b border-neutral-700">
-              <th className="pb-2">Game</th>
-              <th className="pb-2">Username</th>
-              <th className="pb-2">Bet</th>
-              <th className="pb-2">Multiplier</th>
-              <th className="pb-2">Payout</th>
-            </tr>
-          </thead>
-          <tbody>
-            {bets.map((bet) => (
-              <tr key={bet.id} className="border-b border-neutral-700">
-                <td className="py-3">
-                  <div className="flex items-center space-x-2">
-                    <div className="w-4 h-4 bg-green-500 rounded flex items-center justify-center">
-                      <TrendingUp className="w-3 h-3 text-white" />
-                    </div>
-                    <span className="text-sm">{bet.game}</span>
+      {/* Column Headers */}
+      <div className="grid grid-cols-5 gap-4 mb-4 text-gray-400 text-sm font-medium">
+        <div>Game</div>
+        <div>Username</div>
+        <div>Bet</div>
+        <div>Multiplier</div>
+        <div>Payout</div>
+      </div>
+
+      {/* Bet Entries */}
+      <div className="space-y-3">
+        {bets.map((bet) => (
+          <div 
+            key={bet.id} 
+            className="bg-gray-800/50 backdrop-blur-sm rounded-lg p-4 shadow-lg border border-gray-700/30"
+          >
+            <div className="grid grid-cols-5 gap-4 items-center">
+              {/* Game Column */}
+              <div className="flex items-center space-x-3">
+                <div className="w-6 h-6 bg-green-500 rounded flex items-center justify-center">
+                  {/* Dice icon - 2x2 grid of dots */}
+                  <div className="grid grid-cols-2 gap-0.5">
+                    <div className="w-1 h-1 bg-white rounded-full"></div>
+                    <div className="w-1 h-1 bg-white rounded-full"></div>
+                    <div className="w-1 h-1 bg-white rounded-full"></div>
+                    <div className="w-1 h-1 bg-white rounded-full"></div>
                   </div>
-                </td>
-                <td className="py-3">
-                  <div className="flex items-center space-x-2">
-                    <div className="w-6 h-6 bg-neutral-600 rounded-full flex items-center justify-center text-xs">
+                </div>
+                <span className="text-white font-medium">{bet.game}</span>
+              </div>
+
+              {/* Username Column */}
+              <div className="flex items-center space-x-3">
+                <div className="w-8 h-8 rounded-full overflow-hidden">
+                  {/* Robot avatar - different styles for each user */}
+                  {bet.username === "Kevin" && (
+                    <div className="w-full h-full bg-purple-500 flex items-center justify-center">
+                      <div className="w-4 h-4 bg-purple-300 rounded-full"></div>
+                    </div>
+                  )}
+                  {bet.username === "badalasong" && (
+                    <div className="w-full h-full bg-gray-400 flex items-center justify-center">
+                      <div className="w-4 h-4 bg-red-500 rounded-full"></div>
+                    </div>
+                  )}
+                  {bet.username === "haargpooolnt" && (
+                    <div className="w-full h-full bg-gray-700 flex items-center justify-center">
+                      <div className="w-4 h-4 bg-blue-400 rounded-full"></div>
+                    </div>
+                  )}
+                  {!["Kevin", "badalasong", "haargpooolnt"].includes(bet.username) && (
+                    <div className="w-full h-full bg-gray-600 flex items-center justify-center text-xs text-white">
                       {bet.avatar}
                     </div>
-                    <span className="text-sm">{bet.username}</span>
-                  </div>
-                </td>
-                <td className="py-3">
-                  <div className="flex items-center space-x-1">
-                    <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
-                    <span className="text-sm">{bet.bet}</span>
-                  </div>
-                </td>
-                <td className="py-3">
-                  <span className="text-sm">{bet.multiplier}</span>
-                </td>
-                <td className="py-3">
-                  <div className="flex items-center space-x-1">
-                    <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
-                    <span className="text-sm">{bet.payout}</span>
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+                  )}
+                </div>
+                <span className="text-white font-medium">{bet.username}</span>
+              </div>
+
+              {/* Bet Column */}
+              <div className="flex items-center space-x-2">
+                <div className="w-4 h-4 bg-yellow-500 rounded flex items-center justify-center">
+                  <span className="text-yellow-900 text-xs font-bold">W</span>
+                </div>
+                <span className="text-white">{bet.bet}</span>
+              </div>
+
+              {/* Multiplier Column */}
+              <div className="text-white">
+                {bet.multiplier}
+              </div>
+
+              {/* Payout Column */}
+              <div className="flex items-center space-x-2">
+                <div className="w-4 h-4 bg-yellow-500 rounded flex items-center justify-center">
+                  <span className="text-yellow-900 text-xs font-bold">W</span>
+                </div>
+                <span className="text-green-400 font-medium">{bet.payout}</span>
+              </div>
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   );
