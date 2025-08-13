@@ -7,8 +7,8 @@ const GamesSection = () => {
 		{ title: "Crash", slug: "crash", image: "https://res.cloudinary.com/dma1c8i6n/image/upload/v1754055246/20250711_0435_Rocket_s_Rise_simple_compose_01jzvhxecxf5wv1w8ct0345fks_ezq5eq.png" },
 		{ title: "Plinko", slug: "plinko", image: "https://res.cloudinary.com/dma1c8i6n/image/upload/v1754055244/20250711_0441_Electric_Plinko_Adventure_simple_compose_01jzvj9t_kiix7d.png" },
 		{ title: "Roulette", slug: "roulette", image: "https://res.cloudinary.com/dma1c8i6n/image/upload/v1754055253/20250711_0455_Dynamic_Roulette_Spin_simple_compose_01jzvk2a0af419z5s48sm52dqd_qins71.png" },
-		{ title: "CoinFlip", slug: "coinflip", image: "https://res.cloudinary.com/dma1c8i6n/image/upload/v1754055256/20250711_0436_Dynamic_Dice_Roll_simple_compose_01jzvj0xxpey0b1g9dxj01h7em_zemqds.png" },
-		{ title: "Mines", slug: "mines", image: "https://res.cloudinary.com/dma1c8i6n/image/upload/v1754055256/20250711_0436_Dynamic_Dice_Roll_simple_compose_01jzvj0xxpey0b1g9dxj01h7em_zemqds.png" },
+		{ title: "CoinFlip", slug: "coinflip", image: "https://res.cloudinary.com/dma1c8i6n/image/upload/v1754055244/20250711_0455_Suspenseful_Coinflip_Casino_remix_01jzvk1a6tfdabsantqec6vp1m_af9xug.png" },
+		{ title: "Mines", slug: "mines", image: "https://res.cloudinary.com/dma1c8i6n/image/upload/v1754055267/20250711_0454_Suspenseful_Mines_Game_Moment_simple_compose_01jz_xts5zy.png" },
 		{ title: "Dice", slug: "dice", image: "https://res.cloudinary.com/dma1c8i6n/image/upload/v1754055256/20250711_0436_Dynamic_Dice_Roll_simple_compose_01jzvj0xxpey0b1g9dxj01h7em_zemqds.png" },
 	], []);
 
