@@ -43,7 +43,7 @@ export default function Sidebar() {
 						to={game.href}
 						className={({ isActive }) =>
 							cn(
-								"flex items-center space-x-3 px-4 py-2 rounded-md text-lg font-medium transition-colors group",
+								"flex items-center space-x-3  px-4 py-4 rounded-md text-lg font-medium transition-colors group",
 								isActive
 									? "bg-neutral-700 text-white font-bold"
 									: "text-gray-400 hover:bg-neutral-700 hover:text-white"
@@ -61,7 +61,7 @@ export default function Sidebar() {
 				))}
 
 				{/* Divider */}
-				<div className="border-t border-gray-600 my-2 "></div>
+				<div className="border-t border-gray-600 m-4 "></div>
 
 				{/* Legal Links */}
 				<div className="pt-6 p-3">
