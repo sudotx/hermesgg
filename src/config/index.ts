@@ -1,5 +1,7 @@
 import { ethers } from "ethers";
 
+export const OWNER = ""
+
 export const config = {
     appName: "Hermes Games",
     projectId: "8X1df9Wbcqj6A7LWG71Ra5yLYj-1eL7y",
@@ -18,7 +20,6 @@ export const getGameData = async (gameId: string) => {
   }
 };
 
-export const OWNER = ""
 
 export const RandomizerRouter = {
 	address:"0x123121Df4cd41f3Bba2A229d5A898255EB21D6B8",
