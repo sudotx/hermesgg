@@ -52,7 +52,7 @@ const Home = () => {
 				{/* About Us Section */}
 				<AboutUs />
 
-				<StakeNFTSection/>
+				<StakeNFTSection />
 
 				{/* FAQs Section */}
 				<Faqs />

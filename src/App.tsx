@@ -5,21 +5,22 @@ import "@rainbow-me/rainbowkit/styles.css";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "react-hot-toast";
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
-import { WagmiProvider } from "wagmi";
+import { http, WagmiProvider } from "wagmi";
 
 import { getDefaultConfig } from "@rainbow-me/rainbowkit";
+import { sepolia } from 'viem/chains';
 import { AppLayout } from './components';
 import { config as appConfig } from './config';
-import { chains } from './config/chains';
 import { queryClient } from "./config/queryClient";
-import { transports } from './config/transports';
 import { CoinFlip, Crash, Dice, Home, Mines, NotFound, Plinko, Roulette } from './pages';
 
 const wagmiConfig = getDefaultConfig({
-    appName: appConfig.appName,
-    projectId: appConfig.projectId,
-    chains: [chains],
-    transports: transports,
+  appName: appConfig.appName,
+  projectId: appConfig.projectId,
+  chains: [sepolia],
+  transports: {
+    [sepolia.id]: http(),
+  },
 });
 
 function App() {
