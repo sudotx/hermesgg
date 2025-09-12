@@ -15,13 +15,13 @@ const NavBar = () => {
 				<ul className="flex gap-7 list-none m-0 p-0 text-[15px] font-normal items-center">
 					<li className="text-[#FFD600] font-bold cursor-pointer">About Us</li>
 					<li className="text-white font-medium cursor-pointer">Inhouse Games</li>
-					<li className="text-white font-medium cursor-pointer">Marketplace</li>
-					<li className="text-white font-medium cursor-pointer">Creators</li>
+					<li className="text-white font-medium cursor-pointer"><a href="https://hermesgames.gitbook.io/hermes-games/" target="_blank" rel="noopener noreferrer">Documentation</a></li>
+					<li className="text-white font-medium cursor-pointer"><a href="https://medium.com/@hermesonwmc" target="_blank" rel="noopener noreferrer">Medium</a></li>
 				</ul>
 
 				{/* Join Now Button */}
 				<button className="bg-[#2FFF8A] text-[#10151A] border-none rounded-full px-6 py-1.5 font-bold text-[15px] cursor-pointer shadow-md transition-colors">
-					Join Now
+					Mint NFT
 				</button>
 			</div>
 		</nav>
