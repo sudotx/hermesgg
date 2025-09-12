@@ -28,7 +28,7 @@ const Home = () => {
 					<div className="text-center mb-12">
 						<h2 className="text-4xl font-bold text-white mb-4">Inhouse Games</h2>
 						<p className="text-gray-400 text-lg max-w-2xl mx-auto">
-							Qorem ipsum dolor sit amet, consectetur adipiscing <br /> elit. Nunc vulputate libero et.
+							A curated selection of original onchain classics built in-house by Hermes & Played by mortals.
 						</p>
 					</div>
 
@@ -36,14 +36,14 @@ const Home = () => {
 					<GamesSection />
 
 					{/* Explore Now Button */}
-					<div className="text-center mt-12">
+					{/* <div className="text-center mt-12">
 						<Link
 							to="/app"
 							className="bg-[#FFD600] text-black px-8 py-4 rounded-full font-bold text-lg hover:bg-[#FFD600]/90 transition-colors shadow-lg"
 						>
 							Explore Now
 						</Link>
-					</div>
+					</div> */}
 				</div>
 
 				{/* Banner Section */}

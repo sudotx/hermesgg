@@ -12,7 +12,8 @@ const Footer = () => {
 
 						{/* Description */}
 						<p className="text-gray-400 text-sm leading-relaxed mb-8">
-							the leading NFT Marketplace on Ethereum. Home to the next generation of digital creators. Discover the best NFT collections and Inhouse games
+							Hermes brings provably fair games and NFT-powered rewards to WMChain all built onchain from day one. Hermes is where chads play!  The house doesn’t lie, and the gods don’t miss.
+
 						</p>
 
 						{/* Social Media Icons */}
@@ -40,13 +41,13 @@ const Footer = () => {
 
 						{/* Copyright */}
 						<p className="text-gray-400 text-sm">
-							© 2025 <span className="text-[#FFD600] font-bold">NAME</span>. All Right Reserved
+							© {new Date().getFullYear()} <span className="text-[#FFD600] font-bold">HERMES Games</span>. All Right Reserved
 						</p>
 					</div>
 
 					{/* Marketplace Section */}
 					<div className="col-span-1">
-						<h3 className="text-white font-bold text-lg mb-6">Marketplace</h3>
+						<h3 className="text-white font-bold text-lg mb-6">Casino</h3>
 						<div className="space-y-3">
 							<a href="#" className="block text-gray-400 hover:text-white transition-colors cursor-pointer">Explore</a>
 							<a href="#" className="block text-gray-400 hover:text-white transition-colors cursor-pointer">Articles</a>
@@ -58,12 +59,12 @@ const Footer = () => {
 					<div className="col-span-1">
 						<h3 className="text-white font-bold text-lg mb-6">Inhouse Games</h3>
 						<div className="grid grid-cols-1 gap-x-8 gap-y-3">
-							<a href="#" className="block text-gray-400 hover:text-white transition-colors cursor-pointer">Crash</a>
-							<a href="#" className="block text-gray-400 hover:text-white transition-colors cursor-pointer">Dice</a>
-							<a href="#" className="block text-gray-400 hover:text-white transition-colors cursor-pointer">Plinko</a>
-							<a href="#" className="block text-gray-400 hover:text-white transition-colors cursor-pointer">Coin Flip</a>
-							<a href="#" className="block text-gray-400 hover:text-white transition-colors cursor-pointer">Roulette</a>
-							<a href="#" className="block text-gray-400 hover:text-white transition-colors cursor-pointer">Mines</a>
+							<a href="/app/crash" className="block text-gray-400 hover:text-white transition-colors cursor-pointer">Crash</a>
+							<a href="/app/dice" className="block text-gray-400 hover:text-white transition-colors cursor-pointer">Dice</a>
+							<a href="/app/roulette" className="block text-gray-400 hover:text-white transition-colors cursor-pointer">Plinko</a>
+							<a href="/app/coin-flip" className="block text-gray-400 hover:text-white transition-colors cursor-pointer">Coin Flip</a>
+							<a href="/app/roulette" className="block text-gray-400 hover:text-white transition-colors cursor-pointer">Roulette</a>
+							<a href="/app/mines" className="block text-gray-400 hover:text-white transition-colors cursor-pointer">Mines</a>
 						</div>
 					</div>
 
