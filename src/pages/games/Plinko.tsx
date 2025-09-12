@@ -44,7 +44,7 @@ const Plinko = () => {
 			<GameNavbar />
 
 			{/* Main Content */}
-			<div className="flex flex-1 overflow-hidden">
+			<div className="flex flex-1">
 				{/* Left Panel - Betting Controls & Player List */}
 				<div className="w-80 bg-neutral-800 p-4 flex flex-col">
 					{/* Betting Controls */}
@@ -164,11 +164,11 @@ const Plinko = () => {
 						<div className="absolute top-6 left-6 right-6 flex justify-between items-center z-10">
 							{/* Game ID */}
 							<div className="text-white text-sm font-mono">03498945</div>
-							
+
 							{/* Statistics Button */}
 							<button className="flex items-center space-x-2 px-4 py-2 bg-gray-800/50 rounded-lg text-white text-sm">
 								<svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-									<path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z"/>
+									<path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z" />
 								</svg>
 								<span>Statistics</span>
 							</button>
@@ -191,19 +191,18 @@ const Plinko = () => {
 													{ row: 6, peg: 4 }, // 7th row, 5th peg
 													{ row: 8, peg: 6 }, // 9th row, 7th peg
 												];
-												
+
 												const isGlowing = glowingPegs.some(
 													glowPeg => glowPeg.row === rowIndex && glowPeg.peg === pegIndex
 												);
-												
+
 												return (
 													<div
 														key={pegIndex}
-														className={`w-3 h-3 rounded-full ${
-															isGlowing 
-																? 'bg-white shadow-lg shadow-white/50 animate-pulse' 
+														className={`w-3 h-3 rounded-full ${isGlowing
+																? 'bg-white shadow-lg shadow-white/50 animate-pulse'
 																: 'bg-gray-300'
-														}`}
+															}`}
 													></div>
 												);
 											})}

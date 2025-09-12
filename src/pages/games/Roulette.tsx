@@ -56,7 +56,7 @@ const Roulette = () => {
 			<GameNavbar />
 
 			{/* Main Content */}
-			<div className="flex flex-1 overflow-hidden">
+			<div className="flex flex-1">
 				{/* Left Panel - Betting Controls & Player List */}
 				<div className="w-80 bg-neutral-800 p-4 flex flex-col">
 					{/* Betting Controls */}
@@ -147,7 +147,7 @@ const Roulette = () => {
 						<div className="absolute top-6 left-6 right-6 flex justify-between items-center z-10">
 							{/* Game ID */}
 							<div className="text-white text-sm font-mono">03498945</div>
-							
+
 							{/* Multiplier Buttons */}
 							<div className="flex space-x-2">
 								{[
@@ -169,7 +169,7 @@ const Roulette = () => {
 							{/* Statistics Button */}
 							<button className="flex items-center space-x-2 px-4 py-2 bg-transparent text-white text-sm">
 								<svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-									<path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z"/>
+									<path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z" />
 								</svg>
 								<span>Statistics</span>
 							</button>
@@ -187,7 +187,7 @@ const Roulette = () => {
 								<div className="flex space-x-1">
 									{/* Faded left block */}
 									<div className="w-12 h-12 bg-blue-400/30 rounded-lg flex items-center justify-center text-white/50 text-lg font-bold"></div>
-									
+
 									{/* Main number blocks */}
 									{[
 										{ number: '4', color: 'bg-yellow-600' },
@@ -201,14 +201,13 @@ const Roulette = () => {
 									].map((block, index) => (
 										<div
 											key={index}
-											className={`w-12 h-12 ${block.color} rounded-lg flex items-center justify-center text-lg font-bold ${
-												block.color === 'bg-yellow-600' ? 'text-black' : 'text-white'
-											}`}
+											className={`w-12 h-12 ${block.color} rounded-lg flex items-center justify-center text-lg font-bold ${block.color === 'bg-yellow-600' ? 'text-black' : 'text-white'
+												}`}
 										>
 											{block.number}
 										</div>
 									))}
-									
+
 									{/* Faded right block */}
 									<div className="w-12 h-12 bg-blue-400/30 rounded-lg flex items-center justify-center text-white/50 text-lg font-bold"></div>
 								</div>

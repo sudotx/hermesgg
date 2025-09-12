@@ -33,7 +33,7 @@ const CoinFlip = () => {
 			<GameNavbar />
 
 			{/* Main Content */}
-			<div className="flex flex-1 overflow-hidden">
+			<div className="flex flex-1">
 				{/* Left Panel - Betting Controls & Player List */}
 				<div className="w-80 bg-neutral-800 p-4 flex flex-col">
 					{/* Betting Controls */}
@@ -132,11 +132,11 @@ const CoinFlip = () => {
 						<div className="absolute top-6 left-6 right-6 flex justify-between items-center z-10">
 							{/* Game ID */}
 							<div className="text-white text-sm font-mono">03498945</div>
-							
+
 							{/* Statistics Button */}
 							<button className="flex items-center space-x-2 px-4 py-2 bg-transparent text-white text-sm">
 								<svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-									<path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z"/>
+									<path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z" />
 								</svg>
 								<span>Statistics</span>
 							</button>
@@ -152,7 +152,7 @@ const CoinFlip = () => {
 									<div className="w-16 h-16 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-full mx-auto mb-3 flex items-center justify-center shadow-lg relative">
 										<div className="w-12 h-12 bg-gradient-to-br from-yellow-300 to-yellow-500 rounded-full flex items-center justify-center">
 											<svg className="w-6 h-6 text-yellow-800" fill="currentColor" viewBox="0 0 24 24">
-												<path d="M12 2L13.09 8.26L20 9L13.09 9.74L12 16L10.91 9.74L4 9L10.91 8.26L12 2Z"/>
+												<path d="M12 2L13.09 8.26L20 9L13.09 9.74L12 16L10.91 9.74L4 9L10.91 8.26L12 2Z" />
 											</svg>
 										</div>
 									</div>
@@ -163,7 +163,7 @@ const CoinFlip = () => {
 								<div className="w-48 h-48 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-full flex items-center justify-center shadow-2xl relative">
 									<div className="w-40 h-40 bg-gradient-to-br from-yellow-300 to-yellow-500 rounded-full flex items-center justify-center">
 										<svg className="w-20 h-20 text-yellow-800" fill="currentColor" viewBox="0 0 24 24">
-											<path d="M12 2L13.09 8.26L20 9L13.09 9.74L12 16L10.91 9.74L4 9L10.91 8.26L12 2Z"/>
+											<path d="M12 2L13.09 8.26L20 9L13.09 9.74L12 16L10.91 9.74L4 9L10.91 8.26L12 2Z" />
 										</svg>
 									</div>
 									{/* Coin shine effect */}
@@ -177,7 +177,7 @@ const CoinFlip = () => {
 									<div className="w-16 h-16 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-full mx-auto mb-3 flex items-center justify-center shadow-lg relative">
 										<div className="w-12 h-12 bg-gradient-to-br from-yellow-300 to-yellow-500 rounded-full flex items-center justify-center">
 											<svg className="w-6 h-6 text-yellow-800" fill="currentColor" viewBox="0 0 24 24">
-												<path d="M12 2L13.09 8.26L20 9L13.09 9.74L12 16L10.91 9.74L4 9L10.91 8.26L12 2Z"/>
+												<path d="M12 2L13.09 8.26L20 9L13.09 9.74L12 16L10.91 9.74L4 9L10.91 8.26L12 2Z" />
 											</svg>
 										</div>
 									</div>
@@ -201,19 +201,17 @@ const CoinFlip = () => {
 									].map((coin, index) => (
 										<div
 											key={index}
-											className={`w-8 h-8 rounded-full flex items-center justify-center shadow-md ${
-												coin.isGold 
-													? 'bg-gradient-to-br from-yellow-400 to-yellow-600' 
+											className={`w-8 h-8 rounded-full flex items-center justify-center shadow-md ${coin.isGold
+													? 'bg-gradient-to-br from-yellow-400 to-yellow-600'
 													: 'bg-gradient-to-br from-gray-400 to-gray-600'
-											}`}
+												}`}
 										>
-											<div className={`w-6 h-6 rounded-full flex items-center justify-center ${
-												coin.isGold 
-													? 'bg-gradient-to-br from-yellow-300 to-yellow-500' 
+											<div className={`w-6 h-6 rounded-full flex items-center justify-center ${coin.isGold
+													? 'bg-gradient-to-br from-yellow-300 to-yellow-500'
 													: 'bg-gradient-to-br from-gray-300 to-gray-500'
-											}`}>
+												}`}>
 												<svg className={`w-3 h-3 ${coin.isGold ? 'text-yellow-800' : 'text-gray-700'}`} fill="currentColor" viewBox="0 0 24 24">
-													<path d="M12 2L13.09 8.26L20 9L13.09 9.74L12 16L10.91 9.74L4 9L10.91 8.26L12 2Z"/>
+													<path d="M12 2L13.09 8.26L20 9L13.09 9.74L12 16L10.91 9.74L4 9L10.91 8.26L12 2Z" />
 												</svg>
 											</div>
 										</div>

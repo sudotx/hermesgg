@@ -46,7 +46,7 @@ const Mines = () => {
       <GameNavbar />
 
       {/* Main Content */}
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex flex-1">
         {/* Left Panel - Betting Controls & Player List */}
         <div className="w-80 bg-neutral-800 p-4 flex flex-col">
           {/* Betting Controls */}
