@@ -4,7 +4,7 @@ import { RainbowKitProvider } from "@rainbow-me/rainbowkit";
 import "@rainbow-me/rainbowkit/styles.css";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "react-hot-toast";
-import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { http, WagmiProvider } from "wagmi";
 
 import { getDefaultConfig } from "@rainbow-me/rainbowkit";
@@ -34,6 +34,7 @@ function App() {
               <Routes>
                 <Route path="/" element={<Home />} />
                 <Route path="/app" element={<AppLayout />}>
+                  <Route index element={<Navigate to="crash" replace />} />
                   <Route path="coin-flip" element={<CoinFlip />} />
                   <Route path="crash" element={<Crash />} />
                   <Route path="mines" element={<Mines />} />

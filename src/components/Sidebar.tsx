@@ -4,7 +4,7 @@ import {
 	CircleDollarSign,
 	Dice5,
 	Instagram,
-	LayoutGrid,
+	Home,
 	MessageSquare,
 	Rocket,
 	Triangle,
@@ -15,7 +15,7 @@ import { NavLink } from "react-router-dom";
 import { cn } from "../utils";
 
 const games = [
-	{ name: "Home", href: "/", icon: LayoutGrid },
+	{ name: "Home", href: "/", icon: Home },
 	{ name: "Crash", href: "/app/crash", icon: Rocket },
 	{ name: "Plinko", href: "/app/plinko", icon: Triangle },
 	{ name: "Roulette", href: "/app/roulette", icon: Circle },
