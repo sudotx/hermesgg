@@ -13,7 +13,9 @@ const GamesSection = () => {
 	], []);
 
 	const [games, setGames] = useState(initialGames);
-	const activeIndex = Math.floor((games.length - 1) / 2);
+	const visibleCount = 5;
+	const visibleGames = games.slice(0, visibleCount);
+	const activeIndex = Math.floor((visibleCount - 1) / 2);
 
 	const handlePrev = useCallback(() => {
 		setGames(prevGames => [prevGames[prevGames.length - 1], ...prevGames.slice(0, prevGames.length - 1)]);
@@ -36,7 +38,7 @@ const GamesSection = () => {
 
 				{/* Game Cards Container */}
 				<div className="flex gap-4 items-center justify-center">
-					{games.map((game, index) => (
+					{visibleGames.map((game, index) => (
 						<GameCard
 							key={game.slug}
 							title={game.title}
