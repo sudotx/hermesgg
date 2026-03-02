@@ -41,7 +41,7 @@ const BannerSection = () => {
 				</div>
 
 				{/* 3. Follow Us Button */}
-				<button className="flex-shrink-0 rounded-full bg-[#FFD600] px-6 py-2.5 text-base font-semibold text-black shadow-lg transition-colors hover:bg-yellow-400">
+				<button className="flex-shrink-0 rounded-full bg-[#FFD600] px-6 py-2.5 text-base font-semibold text-black shadow-lg transition-all duration-200 hover:bg-yellow-400 hover:scale-105">
 					Follow Us
 				</button>
 			</div>

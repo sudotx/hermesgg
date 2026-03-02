@@ -18,8 +18,8 @@ const GameCard = ({ title, image, slug, isActive, onMouseEnter }: GameCardProps)
             className={clsx(
                 'relative w-64 h-80 rounded-2xl overflow-hidden cursor-pointer transition-all duration-500 ease-in-out',
                 {
-                    'scale-110 z-10': isActive, // Active card is larger and on top
-                    'scale-100 z-0': !isActive,  // Inactive cards are normal size
+                    'scale-110 z-10': isActive,
+                    'scale-100 z-0': !isActive,
                 }
             )}
         >
@@ -53,7 +53,7 @@ const GameCard = ({ title, image, slug, isActive, onMouseEnter }: GameCardProps)
                 {isActive ? (
                     <>
                         <h3 className="text-white text-2xl font-bold mb-4">{title}</h3>
-                        <Link to={`/app/${slug}`} className="bg-black text-white text-lg font-semibold py-3 px-16 rounded-lg hover:bg-gray-800 transition-colors">
+                        <Link to={`/app/${slug}`} className="bg-black text-white text-lg font-semibold py-3 px-16 rounded-lg hover:bg-gray-800 hover:scale-105 transition-all duration-200">
                             Play
                         </Link>
                         {/* Active Indicator Dot */}

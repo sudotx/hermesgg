@@ -34,15 +34,6 @@ const Home = () => {
 					{/* Game Cards Section */}
 					<GamesSection />
 
-					{/* Explore Now Button */}
-					{/* <div className="text-center mt-12">
-						<Link
-							to="/app"
-							className="bg-[#FFD600] text-black px-8 py-4 rounded-full font-bold text-lg hover:bg-[#FFD600]/90 transition-colors shadow-lg"
-						>
-							Explore Now
-						</Link>
-					</div> */}
 				</div>
 
 				{/* Banner Section */}

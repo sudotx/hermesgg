@@ -34,17 +34,17 @@ const LeftCard = () => {
 				<p className="text-gray-600 text-2xl mb-12 max-w-[600px]">
 					Hermes Games is a new kind of onchain casino — fast, fair, and fully transparent. Real rewards. Full control. Built on WMChain for speed, trust, and degen fun, all with a touch of divine mischief.
 				</p>
-				<div className="flex gap-3 mt-2">
-					<Link
-						to="/app"
-						className="bg-black text-white rounded-full px-12 py-5 text-2xl font-bold flex items-center shadow-lg hover:bg-gray-800 transition-all"
-					>
+				<Link
+					to="/app"
+					className="flex gap-1.5 mt-2 w-fit group hover:scale-105 transition-transform duration-200"
+				>
+					<span className="bg-black text-white rounded-full px-12 py-5 text-2xl font-bold flex items-center shadow-lg group-hover:bg-gray-800 transition-all">
 						Play Hermes
-					</Link>
-					<button className="bg-black text-white rounded-full w-16 h-16 flex items-center justify-center shadow-lg text-3xl hover:bg-gray-800 transition-all">
+					</span>
+					<span className="bg-black text-white rounded-full w-16 h-16 flex items-center justify-center shadow-lg text-3xl group-hover:bg-gray-800 group-hover:rotate-45 transition-all duration-200">
 						↗
-					</button>
-				</div>
+					</span>
+				</Link>
 			</div>
 
 			{/* Right Column - Character */}
