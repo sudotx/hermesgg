@@ -1,17 +1,20 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import BetsList from "../../components/BetsList";
 import GameNavbar from "../../components/GameNavbar";
 import PlayersList from "../../components/PlayersList";
 import { cn } from "../../utils";
+import { GameCanvas } from "../../components/GameCanvas";
+import { SceneManager } from "../../lib/three/SceneManager";
+import { PhysicsManager } from "../../lib/three/PhysicsManager";
+import { PlinkoGame } from "../../lib/three/games/PlinkoGame";
 
 // Mock data for players
 const mockPlayers = [
-	{ id: 1, username: "haargpooolnt", avatar: "", multiplier: "2.2x", bet: "6.83241" },
-	{ id: 2, username: "Kevin", avatar: "", multiplier: "1.8x", bet: "4.12345" },
-	{ id: 3, username: "badalasong", avatar: "", multiplier: "3.1x", bet: "2.98765" },
+	{ id: 1, username: "haargpooolnt", avatar: "👤", multiplier: "2.2x", bet: "6.83241" },
+	{ id: 2, username: "Kevin", avatar: "👤", multiplier: "1.8x", bet: "4.12345" },
+	{ id: 3, username: "badalasong", avatar: "👤", multiplier: "3.1x", bet: "2.98765" },
 ];
 
-// Mock data for bets history
 const mockBets = [
 	{ id: 1, game: "Plinko", username: "Kevin", avatar: "👤", bet: "1.0851361", multiplier: "8.4x", payout: "1.0851361" },
 	{ id: 2, game: "Plinko", username: "badalasong", avatar: "👤", bet: "1.0851361", multiplier: "8.4x", payout: "1.0851361" },
@@ -27,106 +30,146 @@ const Plinko = () => {
 	const [rows, setRows] = useState(8);
 	const [isBetting, setIsBetting] = useState(false);
 
+	const physicsManagerRef = useRef<PhysicsManager>(new PhysicsManager());
+	const gameRef = useRef<PlinkoGame | null>(null);
+
+	const handleSceneInit = async (manager: SceneManager) => {
+		const pm = physicsManagerRef.current;
+		await pm.init();
+		
+		const game = new PlinkoGame(manager, pm);
+		gameRef.current = game;
+		
+		await game.buildBoard(rows);
+	};
+
+	useEffect(() => {
+		if (gameRef.current) {
+			gameRef.current.buildBoard(rows);
+		}
+	}, [rows]);
+
 	const handleHalfBet = () => setBetAmount((prev) => (parseFloat(prev) / 2).toFixed(2));
 	const handleDoubleBet = () => setBetAmount((prev) => (parseFloat(prev) * 2).toFixed(2));
 
 	const handlePlaceBet = () => {
 		if (isBetting) return;
-		console.log(`Placing a ${betAmount} bet on ${difficulty} with ${rows} rows.`);
-		// Here you would trigger the ball drop animation and game logic
 		setIsBetting(true);
-		// Simulate game finishing after a few seconds
-		setTimeout(() => setIsBetting(false), 3000);
+		
+		// Backend simulates outcome (0 = left, 1 = right bounce)
+		const path: number[] = [];
+		for(let i=0; i<rows; i++) {
+			path.push(Math.random() > 0.5 ? 1 : 0);
+		}
+		
+		gameRef.current?.dropBall(path);
+
+		// Re-enable betting quickly so user can drop multiple balls
+		setTimeout(() => setIsBetting(false), 200);
 	};
 
+	const multipliersMap: Record<number, {value: string, color: string}[]> = {
+		8: [
+			{ value: '5.6x', color: 'bg-red-600' }, { value: '2.1x', color: 'bg-orange-600' }, { value: '1.1x', color: 'bg-yellow-600' },
+			{ value: '1x', color: 'bg-green-600' }, { value: '0.5x', color: 'bg-gray-600' }, { value: '1x', color: 'bg-green-600' },
+			{ value: '1.1x', color: 'bg-yellow-600' }, { value: '2.1x', color: 'bg-orange-600' }, { value: '5.6x', color: 'bg-red-600' }
+		]
+	};
+
+	const currentMultipliers = multipliersMap[8] || multipliersMap[8]; // Fallback purely for visuals
+
 	return (
-		<div className="flex flex-col h-screen bg-neutral-900 text-white">
+		<div className="flex flex-col min-h-screen bg-[#0F1115] text-white">
 			<GameNavbar />
 
-			{/* Main Content */}
-			<div className="flex flex-1">
-				{/* Left Panel - Betting Controls & Player List */}
-				<div className="w-80 bg-neutral-800 p-4 flex flex-col">
-					{/* Betting Controls */}
-					<div className="mb-6">
-						<div className="flex mb-4">
-							<button
-								onClick={() => setBetMode("manual")}
-								className={cn("flex-1 px-4 py-2 rounded-l text-sm font-medium", betMode === "manual" ? "bg-neutral-700" : "bg-neutral-800 text-gray-400")}
-							>
-								Manual
-							</button>
-							<button
-								onClick={() => setBetMode("auto")}
-								className={cn("flex-1 px-4 py-2 rounded-r text-sm", betMode === "auto" ? "bg-neutral-700" : "bg-neutral-800 text-gray-400")}
-							>
-								Auto
-							</button>
-						</div>
+			{/* Main Content Area */}
+			<div className="w-full max-w-[1500px] mx-auto p-4 md:p-6 flex flex-col gap-6 flex-1">
+				{/* Top Section: Controls (Left) & Canvas (Right) */}
+				<div className="flex flex-col lg:flex-row gap-6 min-h-[500px] lg:h-[600px]">
+					{/* Left Panel - Betting Controls & Player List */}
+					<div className="w-full lg:w-[360px] bg-[#1A1D24] p-5 flex flex-col rounded-2xl border border-gray-800/50 shadow-xl overflow-y-auto custom-scrollbar">
+						{/* Betting Controls */}
+						<div className="flex-none mb-6">
+							{/* Manual/Auto Tabs */}
+							<div className="flex p-1 bg-[#101217] rounded-lg mb-6">
+								<button
+									onClick={() => setBetMode("manual")}
+									className={cn("flex-1 py-2.5 rounded-md text-sm font-semibold transition-all duration-200", betMode === "manual" ? "bg-[#252A36] text-white shadow-sm" : "text-gray-500 hover:text-gray-300")}
+								>
+									Manual
+								</button>
+								<button
+									onClick={() => setBetMode("auto")}
+									className={cn("flex-1 py-2.5 rounded-md text-sm font-semibold transition-all duration-200", betMode === "auto" ? "bg-[#252A36] text-white shadow-sm" : "text-gray-500 hover:text-gray-300")}
+								>
+									Auto
+								</button>
+							</div>
 
-						{/* Bet Amount */}
-						<div className="mb-4">
-							<label className="block text-sm text-gray-400 mb-2">Bet amount</label>
-							<div className="flex items-center space-x-2">
-								<div className="flex-1 relative">
-									<div className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 bg-blue-500 rounded-full"></div>
-									<input
-										type="text"
-										value={betAmount}
-										onChange={(e) => setBetAmount(e.target.value)}
+							{/* Bet Amount Input */}
+							<div className="mb-4">
+								<div className="flex justify-between items-center mb-2">
+									<label className="text-sm font-medium text-gray-400">Bet amount</label>
+								</div>
+								<div className="flex items-center space-x-2 bg-[#252A36] rounded-lg p-1.5 border border-gray-700/50 focus-within:border-gray-500 transition-colors">
+									<div className="flex-1 relative flex items-center pl-3">
+										<div className="w-5 h-5 bg-blue-500/20 rounded-full flex items-center justify-center mr-2">
+											<div className="w-3 h-3 bg-blue-500 rounded-full"></div>
+										</div>
+										<input
+											type="text"
+											value={betAmount}
+											onChange={(e) => setBetAmount(e.target.value)}
+											disabled={isBetting}
+											className="w-full bg-transparent text-white font-medium disabled:opacity-50 outline-none"
+										/>
+									</div>
+									<div className="flex space-x-1 pr-1">
+										<button onClick={handleHalfBet} disabled={isBetting} className="px-3 py-1.5 bg-[#1A1D24] rounded-md text-xs font-semibold text-gray-400 hover:text-white hover:bg-[#323945] transition-colors disabled:opacity-50">1/2</button>
+										<button onClick={handleDoubleBet} disabled={isBetting} className="px-3 py-1.5 bg-[#1A1D24] rounded-md text-xs font-semibold text-gray-400 hover:text-white hover:bg-[#323945] transition-colors disabled:opacity-50">2x</button>
+									</div>
+								</div>
+							</div>
+
+							{/* Difficulty */}
+							<div className="mb-4">
+								<label className="block text-sm font-medium text-gray-400 mb-2">Difficulty</label>
+								<div className="flex bg-[#252A36] rounded-xl p-1 border border-gray-700/50 relative">
+									<button
+										className={cn("flex-1 py-2 rounded-lg text-sm font-bold transition-all relative z-10", difficulty === "easy" ? "text-green-500" : "text-gray-400 hover:text-gray-300")}
+										onClick={() => setDifficulty("easy")}
 										disabled={isBetting}
-										className="w-full pl-10 pr-4 py-2 bg-neutral-700 rounded text-white disabled:opacity-50"
-									/>
+									>
+										Easy
+										{difficulty === "easy" && <div className="absolute inset-0 bg-green-500/10 rounded-lg -z-10 border border-green-500/30"></div>}
+									</button>
+									<button
+										className={cn("flex-1 py-2 rounded-lg text-sm font-bold transition-all relative z-10", difficulty === "medium" ? "text-yellow-500" : "text-gray-400 hover:text-gray-300")}
+										onClick={() => setDifficulty("medium")}
+										disabled={isBetting}
+									>
+										Medium
+										{difficulty === "medium" && <div className="absolute inset-0 bg-yellow-500/10 rounded-lg -z-10 border border-yellow-500/30"></div>}
+									</button>
+									<button
+										className={cn("flex-1 py-2 rounded-lg text-sm font-bold transition-all relative z-10", difficulty === "hard" ? "text-red-500" : "text-gray-400 hover:text-gray-300")}
+										onClick={() => setDifficulty("hard")}
+										disabled={isBetting}
+									>
+										Hard
+										{difficulty === "hard" && <div className="absolute inset-0 bg-red-500/10 rounded-lg -z-10 border border-red-500/30"></div>}
+									</button>
 								</div>
-								<button onClick={handleHalfBet} disabled={isBetting} className="px-3 py-2 bg-neutral-700 rounded text-sm disabled:opacity-50">
-									1/2
-								</button>
-								<button onClick={handleDoubleBet} disabled={isBetting} className="px-3 py-2 bg-green-600 rounded text-sm disabled:opacity-50">
-									x2
-								</button>
 							</div>
-						</div>
 
-						{/* Difficulty */}
-						<div className="mb-4">
-							<label className="block text-sm text-gray-400 mb-2">Difficulty</label>
-							<div className="grid grid-cols-3 gap-2">
-								<button
-									className={cn("px-4 py-2 rounded text-sm font-medium", difficulty === "easy" ? "bg-green-600 text-white" : "bg-neutral-700 text-gray-300")}
-									onClick={() => setDifficulty("easy")}
-									disabled={isBetting}
-								>
-									Easy
-								</button>
-								<button
-									className={cn("px-4 py-2 rounded text-sm font-medium", difficulty === "medium" ? "bg-yellow-600 text-black" : "bg-neutral-700 text-gray-300")}
-									onClick={() => setDifficulty("medium")}
-									disabled={isBetting}
-								>
-									Medium
-								</button>
-								<button
-									className={cn("px-4 py-2 rounded text-sm font-medium", difficulty === "hard" ? "bg-red-600 text-white" : "bg-neutral-700 text-gray-300")}
-									onClick={() => setDifficulty("hard")}
-									disabled={isBetting}
-								>
-									Hard
-								</button>
-							</div>
-						</div>
-
-						{/* Amount of Rows */}
-						<div className="mb-4">
-							<label className="block text-sm text-gray-400 mb-2">Amount of rows</label>
-							<div className="flex items-center space-x-2">
-								<div className="w-6 h-6 bg-neutral-600 rounded flex items-center justify-center">
-									<div className="w-4 h-1 bg-white rounded"></div>
-								</div>
-								<div className="flex space-x-1">
+							{/* Amount of Rows */}
+							<div className="mb-6">
+								<label className="block text-sm font-medium text-gray-400 mb-2">Amount of rows</label>
+								<div className="flex space-x-2">
 									{[8, 10, 12, 14, 16].map((row) => (
 										<button
 											key={row}
-											className={cn("px-2 py-1 rounded text-xs", rows === row ? "bg-blue-600 text-white" : "bg-neutral-700 text-gray-300")}
+											className={cn("flex-1 py-2 rounded-xl text-xs font-bold transition-all border disabled:opacity-50", rows === row ? "bg-blue-500/10 border-blue-500/50 text-blue-500 shadow-[0_0_15px_rgba(59,130,246,0.15)]" : "bg-[#252A36] border-transparent text-gray-400 hover:bg-[#2A303C]")}
 											onClick={() => setRows(row)}
 											disabled={isBetting}
 										>
@@ -135,38 +178,33 @@ const Plinko = () => {
 									))}
 								</div>
 							</div>
+
+							<button
+								onClick={handlePlaceBet}
+								disabled={isBetting}
+								className="w-full bg-green-500 hover:bg-green-400 text-[#101217] font-black py-4 rounded-xl text-lg transition-all shadow-green-500/20 hover:shadow-green-500/40 shadow-lg active:scale-[0.98] mt-2 disabled:opacity-50 disabled:cursor-not-allowed"
+							>
+								{isBetting ? "Dropping..." : "Place Bet"}
+							</button>
 						</div>
 
-						<button
-							onClick={handlePlaceBet}
-							disabled={isBetting}
-							className="w-full bg-yellow-500 text-black font-bold py-3 rounded-full text-lg disabled:opacity-50 disabled:cursor-not-allowed"
-						>
-							{isBetting ? "Betting..." : "Place Bet"}
-						</button>
+						{/* Divider */}
+						<div className="h-px bg-gray-800/50 my-2 flex-none"></div>
+
+						{/* Players List */}
+						<div className="flex-1 overflow-y-auto custom-scrollbar mt-4">
+							<PlayersList players={mockPlayers} />
+						</div>
 					</div>
 
-					<PlayersList players={mockPlayers} />
-				</div>
-
-				{/* Right Panel - Plinko Game Visualization */}
-				<div className="flex-1">
-					{/* Game Area with overlaid elements */}
-					<div className="h-full bg-gradient-to-r from-teal-900 to-purple-900 rounded-lg relative overflow-hidden">
-						{/* Background organic shapes */}
-						<div className="absolute inset-0">
-							<div className="absolute top-20 left-10 w-32 h-32 bg-blue-400/10 rounded-full blur-xl"></div>
-							<div className="absolute bottom-40 left-20 w-24 h-24 bg-green-400/10 rounded-full blur-lg"></div>
-							<div className="absolute top-1/2 left-1/4 w-16 h-16 bg-teal-400/10 rounded-full blur-md"></div>
-						</div>
-
+					{/* Right Panel - Plinko Game Visualization */}
+					<div className="flex-1 flex flex-col relative">
+						<div className="w-full h-full bg-[#1A1D24] rounded-2xl relative overflow-hidden border border-gray-800/50 shadow-2xl bg-gradient-to-br from-[#1A1D24] to-[#12141A]">
+						
 						{/* Top Section */}
-						<div className="absolute top-6 left-6 right-6 flex justify-between items-center z-10">
-							{/* Game ID */}
+						<div className="absolute top-6 left-6 right-6 flex justify-between items-center z-10 pointer-events-none">
 							<div className="text-white text-sm font-mono">03498945</div>
-
-							{/* Statistics Button */}
-							<button className="flex items-center space-x-2 px-4 py-2 bg-gray-800/50 rounded-lg text-white text-sm">
+							<button className="flex items-center space-x-2 px-4 py-2 bg-neutral-800/80 rounded-md text-white text-sm pointer-events-auto hover:bg-neutral-700 transition">
 								<svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
 									<path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z" />
 								</svg>
@@ -175,80 +213,14 @@ const Plinko = () => {
 						</div>
 
 						{/* Plinko Board - Central Area */}
-						<div className="absolute inset-0 flex items-center justify-center">
-							<div className="relative">
-								{/* Triangular grid of pegs */}
-								<div className="flex flex-col items-center space-y-4">
-									{/* Generate 10 rows of pegs */}
-									{Array.from({ length: 10 }, (_, rowIndex) => (
-										<div key={rowIndex} className="flex space-x-4">
-											{Array.from({ length: rowIndex + 1 }, (_, pegIndex) => {
-												// Define the glowing pegs path
-												const glowingPegs = [
-													{ row: 0, peg: 0 }, // Top apex
-													{ row: 2, peg: 1 }, // 3rd row, 2nd peg
-													{ row: 4, peg: 2 }, // 5th row, 3rd peg
-													{ row: 6, peg: 4 }, // 7th row, 5th peg
-													{ row: 8, peg: 6 }, // 9th row, 7th peg
-												];
+						<GameCanvas onSceneInit={handleSceneInit} cameraType="orthographic" className="absolute inset-0" />
 
-												const isGlowing = glowingPegs.some(
-													glowPeg => glowPeg.row === rowIndex && glowPeg.peg === pegIndex
-												);
-
-												return (
-													<div
-														key={pegIndex}
-														className={`w-3 h-3 rounded-full ${isGlowing
-																? 'bg-white shadow-lg shadow-white/50 animate-pulse'
-																: 'bg-gray-300'
-															}`}
-													></div>
-												);
-											})}
-										</div>
-									))}
-								</div>
-							</div>
-						</div>
-
-						{/* Right Side Multipliers */}
-						<div className="absolute right-6 top-1/2 transform -translate-y-1/2 flex flex-col space-y-2">
-							{[
-								{ value: '2.2x', color: 'bg-green-600' },
-								{ value: '2.8x', color: 'bg-purple-800' },
-								{ value: '2.2x', color: 'bg-green-600' },
-								{ value: '2.8x', color: 'bg-purple-800' },
-								{ value: '2.8x', color: 'bg-yellow-600' },
-								{ value: '2.8x', color: 'bg-purple-800' },
-								{ value: '1.8x', color: 'bg-purple-400' }
-							].map((multiplier, index) => (
+						{/* Bottom Multipliers Overlay */}
+						<div className="absolute bottom-4 left-0 right-0 flex justify-center space-x-1 px-10 pointer-events-none z-10">
+							{currentMultipliers.map((multiplier, index) => (
 								<div
 									key={index}
-									className={`px-3 py-2 rounded text-sm font-medium text-white ${multiplier.color}`}
-								>
-									{multiplier.value}
-								</div>
-							))}
-						</div>
-
-						{/* Bottom Multipliers */}
-						<div className="absolute bottom-6 left-6 right-6 flex justify-center space-x-2">
-							{[
-								{ value: '2.2x', color: 'bg-green-600' },
-								{ value: '2.2x', color: 'bg-green-600' },
-								{ value: '2.8x', color: 'bg-purple-800' },
-								{ value: '2.8x', color: 'bg-purple-800' },
-								{ value: '2.8x', color: 'bg-yellow-600' },
-								{ value: '2.8x', color: 'bg-yellow-600' },
-								{ value: '2.8x', color: 'bg-purple-800' },
-								{ value: '1.8x', color: 'bg-purple-400' },
-								{ value: '1.8x', color: 'bg-purple-400' },
-								{ value: '2.8x', color: 'bg-purple-800' }
-							].map((multiplier, index) => (
-								<div
-									key={index}
-									className={`px-3 py-2 rounded text-sm font-medium text-white ${multiplier.color}`}
+									className={`flex-1 flex items-center justify-center py-2 rounded text-xs font-bold text-black border border-black/20 shadow-lg ${multiplier.color}`}
 								>
 									{multiplier.value}
 								</div>
@@ -258,7 +230,11 @@ const Plinko = () => {
 				</div>
 			</div>
 
-			<BetsList bets={mockBets} />
+			{/* Bottom Section: Bets List */}
+			<div className="w-full max-w-[1500px] mx-auto px-4 md:px-6 pb-6 mt-4">
+				<BetsList bets={mockBets} />
+			</div>
+		</div>
 		</div>
 	);
 };

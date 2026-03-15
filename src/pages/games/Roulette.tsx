@@ -1,253 +1,224 @@
-
-import { useState } from "react";
+import { useRef, useState } from "react";
 import BetsList from "../../components/BetsList";
 import GameNavbar from "../../components/GameNavbar";
 import PlayersList from "../../components/PlayersList";
 import { cn } from "../../utils";
+import { GameCanvas } from "../../components/GameCanvas";
+import { SceneManager } from "../../lib/three/SceneManager";
+import { RouletteGame as RouletteThreeGame } from "../../lib/three/games/RouletteGame";
 
-// Mock data for players
+// Mock data
 const mockPlayers = [
-	{ id: 1, username: "haargpooolnt", avatar: "��", multiplier: "2.2x", bet: "6.83241" },
-	{ id: 2, username: "Kevin", avatar: "��", multiplier: "1.8x", bet: "4.12345" },
-	{ id: 3, username: "badalasong", avatar: "��", multiplier: "3.1x", bet: "2.98765" },
-	{ id: 4, username: "player4", avatar: "��", multiplier: "1.5x", bet: "1.23456" },
-	{ id: 5, username: "player5", avatar: "��", multiplier: "2.8x", bet: "3.45678" },
+	{ id: 1, username: "haargpooolnt", avatar: "👤", multiplier: "2.2x", bet: "6.83241" },
+	{ id: 2, username: "Kevin", avatar: "👤", multiplier: "1.8x", bet: "4.12345" },
+	{ id: 3, username: "badalasong", avatar: "👤", multiplier: "3.1x", bet: "2.98765" },
 ];
 
-// Mock data for bets history
 const mockBets = [
 	{ id: 1, game: "Roulette", username: "Kevin", avatar: "👤", bet: "1.0851361", multiplier: "8.4x", payout: "9.1151432" },
 	{ id: 2, game: "Roulette", username: "badalasong", avatar: "👤", bet: "0.5432109", multiplier: "2.1x", payout: "1.1407429" },
 	{ id: 3, game: "Roulette", username: "haargpooolnt", avatar: "👤", bet: "2.1234567", multiplier: "1.5x", payout: "3.1851851" },
-	{ id: 4, game: "Roulette", username: "player4", avatar: "👤", bet: "0.9876543", multiplier: "3.2x", payout: "3.1604938" },
 ];
 
-// Mock game numbers with colors
-// const gameNumbers = [
-//   { number: 4, color: "green" },
-//   { number: 0, color: "green" },
-//   { number: 1, color: "black" },
-//   { number: 10, color: "yellow" },
-//   { number: 8, color: "green" },
-//   { number: 5, color: "green" },
-//   { number: 0, color: "yellow" },
-//   { number: 1, color: "green" },
-// ];
-
 const Roulette = () => {
-	const [betAmount, setBetAmount] = useState("6.83241");
-	const [selectedMultiplier, setSelectedMultiplier] = useState("green");
+	const [betAmount, setBetAmount] = useState("10.00");
+	const [selectedColor, setSelectedColor] = useState<"green" | "black" | "red" | null>(null);
+	const [isSpinning, setIsSpinning] = useState(false);
+	const [lastNumbers, setLastNumbers] = useState<number[]>([]);
 
-	//   const getColorClasses = (color: string) => {
-	//     switch (color) {
-	//       case "green":
-	//         return "bg-green-500 text-white";
-	//       case "yellow":
-	//         return "bg-yellow-500 text-black";
-	//       case "black":
-	//         return "bg-black text-white";
-	//       default:
-	//         return "bg-gray-500 text-white";
-	//     }
-	//   };
+	const gameRef = useRef<RouletteThreeGame | null>(null);
+
+	const handleSceneInit = (manager: SceneManager) => {
+		const game = new RouletteThreeGame(manager);
+		gameRef.current = game;
+	};
+
+	const handlePlaceBet = () => {
+		if (isSpinning || !selectedColor) return;
+		setIsSpinning(true);
+
+		// Backend logic simulates roll
+		const ROULETTE_NUMBERS = [
+			0, 32, 15, 19, 4, 21, 2, 25, 17, 34, 6, 27, 13, 36, 11, 30, 8, 23, 10, 5, 24, 16, 33, 1, 20, 14, 31, 9, 22, 18, 29, 7, 28, 12, 35, 3, 26
+		];
+		
+		// Random target slot
+		const randomIdx = Math.floor(Math.random() * 37);
+		const targetNumber = ROULETTE_NUMBERS[randomIdx];
+
+		gameRef.current?.spin(targetNumber);
+
+		// Animation simulation time (approx 6 seconds based on our physics logic)
+		setTimeout(() => {
+			setIsSpinning(false);
+			setLastNumbers(prev => [...prev, targetNumber].slice(-10)); // Keep last 10
+			
+			// Determine color of outcome
+			let outcomeColor = "black";
+			if (targetNumber === 0) outcomeColor = "green";
+			else if ([1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36].includes(targetNumber)) outcomeColor = "red";
+
+			if (outcomeColor === selectedColor) {
+				console.log("Won! Bet color matched outcome.");
+			} else {
+				console.log("Lost! Outcome was", outcomeColor);
+			}
+
+		}, 7000);
+	};
+
+	const getColorStyles = (num: number) => {
+		if (num === 0) return 'bg-green-600';
+		const reds = [1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36];
+		return reds.includes(num) ? 'bg-red-600' : 'bg-gray-800';
+	};
 
 	return (
-		<div className="flex flex-col h-screen bg-neutral-900 text-white">
+		<div className="flex flex-col min-h-screen bg-[#0F1115] text-white">
 			<GameNavbar />
 
-			{/* Main Content */}
-			<div className="flex flex-1">
-				{/* Left Panel - Betting Controls & Player List */}
-				<div className="w-80 bg-neutral-800 p-4 flex flex-col">
-					{/* Betting Controls */}
-					<div className="mb-6">
-						<div className="flex mb-4">
-							<button className="flex-1 bg-neutral-700 px-4 py-2 rounded-l text-sm font-medium">
-								Manual
-							</button>
-							<button className="flex-1 bg-neutral-800 px-4 py-2 rounded-r text-sm text-gray-400">
-								Auto
-							</button>
-						</div>
+			{/* Main Content Area */}
+			<div className="w-full max-w-[1500px] mx-auto p-4 md:p-6 flex flex-col gap-6 flex-1">
+				{/* Top Section: Controls (Left) & Canvas (Right) */}
+				<div className="flex flex-col lg:flex-row gap-6 min-h-[500px] lg:h-[600px]">
+					{/* Left Panel - Betting Controls & Player List */}
+					<div className="w-full lg:w-[360px] bg-[#1A1D24] p-5 flex flex-col rounded-2xl border border-gray-800/50 shadow-xl overflow-y-auto custom-scrollbar">
+						{/* Betting Controls */}
+						<div className="flex-none mb-6">
+							{/* Manual/Auto Tabs */}
+							<div className="flex p-1 bg-[#101217] rounded-lg mb-6">
+								<button className="flex-1 py-2.5 rounded-md text-sm font-semibold transition-all duration-200 bg-[#252A36] text-white shadow-sm">
+									Manual
+								</button>
+								<button className="flex-1 py-2.5 rounded-md text-sm font-semibold transition-all duration-200 text-gray-500 hover:text-gray-300">
+									Auto
+								</button>
+							</div>
 
-						{/* Bet Amount */}
-						<div className="mb-4">
-							<label className="block text-sm text-gray-400 mb-2">Bet amount</label>
-							<div className="flex items-center space-x-2">
-								<div className="flex-1 relative">
-									<div className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 bg-blue-500 rounded-full"></div>
-									<input
-										type="text"
-										value={betAmount}
-										onChange={(e) => setBetAmount(e.target.value)}
-										className="w-full pl-10 pr-4 py-2 bg-neutral-700 rounded text-white"
-									/>
+							{/* Bet Amount Input */}
+							<div className="mb-4">
+								<div className="flex justify-between items-center mb-2">
+									<label className="text-sm font-medium text-gray-400">Bet amount</label>
 								</div>
-								<button className="px-3 py-2 bg-neutral-700 rounded text-sm">10k</button>
-								<button className="px-3 py-2 bg-neutral-700 rounded text-sm">100k</button>
-								<button className="px-3 py-2 bg-neutral-700 rounded text-sm">1/2</button>
-								<button className="px-3 py-2 bg-green-600 rounded text-sm">x2</button>
+								<div className="flex items-center space-x-2 bg-[#252A36] rounded-lg p-1.5 border border-gray-700/50 focus-within:border-gray-500 transition-colors">
+									<div className="flex-1 relative flex items-center pl-3">
+										<div className="w-5 h-5 bg-blue-500/20 rounded-full flex items-center justify-center mr-2">
+											<div className="w-3 h-3 bg-blue-500 rounded-full"></div>
+										</div>
+										<input
+											type="text"
+											value={betAmount}
+											onChange={(e) => setBetAmount(e.target.value)}
+											disabled={isSpinning}
+											className="w-full bg-transparent text-white font-medium disabled:opacity-50 outline-none"
+										/>
+									</div>
+									<div className="flex space-x-1 pr-1">
+										<button disabled={isSpinning} className="px-3 py-1.5 bg-[#1A1D24] rounded-md text-xs font-semibold text-gray-400 hover:text-white hover:bg-[#323945] transition-colors disabled:opacity-50">1/2</button>
+										<button disabled={isSpinning} className="px-3 py-1.5 bg-[#1A1D24] rounded-md text-xs font-semibold text-gray-400 hover:text-white hover:bg-[#323945] transition-colors disabled:opacity-50">2x</button>
+										<button disabled={isSpinning} className="px-3 py-1.5 bg-green-500/20 text-green-400 rounded-md text-xs font-semibold hover:bg-green-500/30 transition-colors disabled:opacity-50">Max</button>
+									</div>
+								</div>
 							</div>
+
+							{/* Color Selection */}
+							<div className="mb-6">
+								<label className="block text-sm font-medium text-gray-400 mb-2">Choose Color</label>
+								<div className="grid grid-cols-3 gap-2">
+									<button
+										disabled={isSpinning}
+										className={cn("px-2 py-4 rounded-xl text-sm font-bold transition-all border disabled:opacity-50 flex flex-col items-center", 
+											selectedColor === "red" ? "bg-red-500/10 border-red-500/50 text-red-500 shadow-[0_0_15px_rgba(239,68,68,0.15)]" : "bg-[#252A36] border-transparent text-gray-400 hover:bg-[#2A303C]"
+										)}
+										onClick={() => setSelectedColor("red")}
+									>
+										<span className="w-5 h-5 rounded-full bg-red-500 mb-1 shadow-[0_0_10px_rgba(239,68,68,0.5)] border border-red-400"></span>
+										Red x2
+									</button>
+									<button
+										disabled={isSpinning}
+										className={cn("px-2 py-4 rounded-xl text-sm font-bold transition-all border disabled:opacity-50 flex flex-col items-center", 
+											selectedColor === "green" ? "bg-green-500/10 border-green-500/50 text-green-500 shadow-[0_0_15px_rgba(34,197,94,0.15)]" : "bg-[#252A36] border-transparent text-gray-400 hover:bg-[#2A303C]"
+										)}
+										onClick={() => setSelectedColor("green")}
+									>
+										<span className="w-5 h-5 rounded-full bg-green-500 mb-1 shadow-[0_0_10px_rgba(34,197,94,0.5)] border border-green-400"></span>
+										Green x14
+									</button>
+									<button
+										disabled={isSpinning}
+										className={cn("px-2 py-4 rounded-xl text-sm font-bold transition-all border disabled:opacity-50 flex flex-col items-center", 
+											selectedColor === "black" ? "bg-gray-400/10 border-gray-400/50 text-white shadow-[0_0_15px_rgba(255,255,255,0.1)]" : "bg-[#252A36] border-transparent text-gray-400 hover:bg-[#2A303C]"
+										)}
+										onClick={() => setSelectedColor("black")}
+									>
+										<span className="w-5 h-5 rounded-full bg-gray-900 mb-1 shadow-[0_0_5px_rgba(0,0,0,0.5)] border border-gray-600"></span>
+										Black x2
+									</button>
+								</div>
+							</div>
+
+							<button 
+								onClick={handlePlaceBet}
+								disabled={isSpinning || !selectedColor}
+								className="w-full bg-yellow-400 hover:bg-yellow-300 text-[#101217] font-black py-4 rounded-xl text-lg transition-all shadow-yellow-400/20 hover:shadow-yellow-400/40 shadow-lg active:scale-[0.98] mt-2 disabled:opacity-50 disabled:cursor-not-allowed"
+							>
+								{isSpinning ? "Spinning..." : "Place Bet"}
+							</button>
 						</div>
 
-						{/* Multiplier Selection */}
-						<div className="mb-4">
-							<label className="block text-sm text-gray-400 mb-2">Multiplier</label>
-							<div className="grid grid-cols-3 gap-2">
-								<button
-									className={cn(
-										"px-4 py-2 rounded text-sm font-medium",
-										selectedMultiplier === "green" ? "bg-green-600 text-white" : "bg-neutral-700 text-gray-300"
-									)}
-									onClick={() => setSelectedMultiplier("green")}
-								>
-									Green x14
-								</button>
-								<button
-									className={cn(
-										"px-4 py-2 rounded text-sm font-medium",
-										selectedMultiplier === "yellow" ? "bg-yellow-600 text-black" : "bg-neutral-700 text-gray-300"
-									)}
-									onClick={() => setSelectedMultiplier("yellow")}
-								>
-									Yellow x10
-								</button>
-								<button
-									className={cn(
-										"px-4 py-2 rounded text-sm font-medium",
-										selectedMultiplier === "black" ? "bg-black text-white" : "bg-neutral-700 text-gray-300"
-									)}
-									onClick={() => setSelectedMultiplier("black")}
-								>
-									Black x2
-								</button>
-							</div>
-						</div>
+						{/* Divider */}
+						<div className="h-px bg-gray-800/50 my-2 flex-none"></div>
 
-						<button className="w-full bg-yellow-500 text-black font-bold py-3 rounded-full text-lg">
-							Place Bet
-						</button>
+						{/* Players List */}
+						<div className="flex-1 overflow-y-auto custom-scrollbar mt-4">
+							<PlayersList players={mockPlayers} />
+						</div>
 					</div>
 
-					<PlayersList players={mockPlayers} />
-				</div>
-
-				{/* Right Panel - Game Visualization */}
-				<div className="flex-1">
-					{/* Game Area with overlaid elements */}
-					<div className="h-full bg-gradient-to-b from-purple-900 via-blue-900 to-purple-800 rounded-lg relative overflow-hidden">
-						{/* Abstract background shapes */}
-						<div className="absolute inset-0">
-							<div className="absolute top-20 right-20 w-32 h-32 bg-purple-600/20 rounded-full blur-xl"></div>
-							<div className="absolute bottom-40 left-40 w-24 h-24 bg-blue-600/15 rounded-full blur-lg"></div>
-							<div className="absolute top-1/2 left-1/3 w-16 h-16 bg-purple-500/10 rounded-full blur-md"></div>
-						</div>
-
-						{/* Top Section */}
-						<div className="absolute top-6 left-6 right-6 flex justify-between items-center z-10">
-							{/* Game ID */}
-							<div className="text-white text-sm font-mono">03498945</div>
-
-							{/* Multiplier Buttons */}
+					{/* Right Panel - ThreeJS Game Visualization */}
+					<div className="flex-1 flex flex-col relative">
+						<div className="w-full h-full bg-[#1A1D24] rounded-2xl relative overflow-hidden border border-gray-800/50 shadow-2xl bg-gradient-to-br from-[#1A1D24] to-[#12141A]">
+						
+						{/* Top Section overlays */}
+						<div className="absolute top-6 left-6 right-6 flex justify-between items-center z-10 pointer-events-none">
+							<div className="text-white text-sm font-mono tracking-widest bg-black/50 px-3 py-1 rounded">03498945</div>
+							
 							<div className="flex space-x-2">
-								{[
-									{ value: '2.2x', color: 'bg-green-600' },
-									{ value: '2.8x', color: 'bg-gray-800' },
-									{ value: '2.8x', color: 'bg-yellow-600' },
-									{ value: '2.8x', color: 'bg-gray-800' },
-									{ value: '2.2x', color: 'bg-green-600' }
-								].map((multiplier, index) => (
-									<button
-										key={index}
-										className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${multiplier.color} text-white`}
-									>
-										{multiplier.value}
+								{['Red 2x', 'Black 2x', 'Green 14x'].map((multiplier, index) => (
+									<button key={index} className={`px-4 py-2 rounded-lg text-xs font-bold transition-colors text-white ${multiplier.includes('Red') ? 'bg-red-600' : multiplier.includes('Green') ? 'bg-green-600' : 'bg-gray-800'}`}>
+										{multiplier}
 									</button>
 								))}
 							</div>
-
-							{/* Statistics Button */}
-							<button className="flex items-center space-x-2 px-4 py-2 bg-transparent text-white text-sm">
-								<svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-									<path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z" />
-								</svg>
-								<span>Statistics</span>
-							</button>
 						</div>
 
-						{/* Central Game Area - Number Blocks */}
-						<div className="absolute inset-0 flex items-center justify-center">
-							<div className="relative">
-								{/* Top triangular marker */}
-								<div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-									<div className="w-0 h-0 border-l-4 border-r-4 border-b-4 border-transparent border-b-white"></div>
-								</div>
+						{/* ThreeJS Container */}
+						<GameCanvas onSceneInit={handleSceneInit} cameraType="orthographic" className="absolute inset-0" />
 
-								{/* Number blocks row */}
-								<div className="flex space-x-1">
-									{/* Faded left block */}
-									<div className="w-12 h-12 bg-blue-400/30 rounded-lg flex items-center justify-center text-white/50 text-lg font-bold"></div>
-
-									{/* Main number blocks */}
-									{[
-										{ number: '4', color: 'bg-yellow-600' },
-										{ number: '0', color: 'bg-green-600' },
-										{ number: '1', color: 'bg-black' },
-										{ number: '10', color: 'bg-yellow-600' },
-										{ number: '8', color: 'bg-green-600' },
-										{ number: '5', color: 'bg-green-600' },
-										{ number: '0', color: 'bg-yellow-600' },
-										{ number: '1', color: 'bg-black' }
-									].map((block, index) => (
-										<div
-											key={index}
-											className={`w-12 h-12 ${block.color} rounded-lg flex items-center justify-center text-lg font-bold ${block.color === 'bg-yellow-600' ? 'text-black' : 'text-white'
-												}`}
-										>
-											{block.number}
-										</div>
-									))}
-
-									{/* Faded right block */}
-									<div className="w-12 h-12 bg-blue-400/30 rounded-lg flex items-center justify-center text-white/50 text-lg font-bold"></div>
-								</div>
-
-								{/* Bottom triangular marker */}
-								<div className="absolute -bottom-4 left-1/2 transform -translate-x-1/2">
-									<div className="w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-white"></div>
-								</div>
+						{/* Bottom Section - Last Rolls */}
+						{lastNumbers.length > 0 && (
+							<div className="absolute bottom-6 left-6 right-6 flex items-center justify-center space-x-2 z-10 pointer-events-none bg-black/40 py-3 rounded-xl backdrop-blur-sm border border-white/5 mx-10">
+								<span className="text-white/70 text-sm font-medium mr-2">Last Outcomes:</span>
+								{lastNumbers.map((num, index) => (
+									<div
+										key={index}
+										className={cn(`w-8 h-8 rounded-full flex items-center justify-center shadow-lg text-white font-bold text-sm border-2 border-white/20`, getColorStyles(num))}
+									>
+										{num}
+									</div>
+								))}
 							</div>
-						</div>
-
-						{/* Bottom Section - Last 100 rolls */}
-						<div className="absolute bottom-6 left-6">
-							<div className="flex items-center space-x-4">
-								<span className="text-white text-sm">Last 100 rolls:</span>
-								<div className="flex items-center space-x-4">
-									<div className="flex items-center space-x-1">
-										<div className="w-3 h-3 bg-green-500 rounded-full"></div>
-										<span className="text-white text-sm">6</span>
-									</div>
-									<div className="flex items-center space-x-1">
-										<div className="w-3 h-3 bg-pink-500 rounded-full"></div>
-										<span className="text-white text-sm">45</span>
-									</div>
-									<div className="flex items-center space-x-1">
-										<div className="w-3 h-3 bg-blue-700 rounded-full"></div>
-										<span className="text-white text-sm">49</span>
-									</div>
-								</div>
-							</div>
-						</div>
-
-						{/* Bottom terrain/landscape */}
-						<div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-purple-800 to-transparent"></div>
+						)}
 					</div>
 				</div>
-
 			</div>
 
-			<BetsList bets={mockBets} />
+			{/* Bottom Section: Bets List */}
+			<div className="w-full max-w-[1500px] mx-auto px-4 md:px-6 pb-6 mt-4">
+				<BetsList bets={mockBets} />
+			</div>
+		</div>
 		</div>
 	);
 };
