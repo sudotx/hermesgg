@@ -113,14 +113,17 @@ export class CrashGame {
      }
 
      if (this.manager.camera instanceof THREE.OrthographicCamera) {
-         const right = this.manager.camera.right;
-         const top = this.manager.camera.top;
-         // Position camera so origin (0,0) is at the bottom-left
-         // Screen X bounds: [camera.x - right, camera.x + right]
-         // Screen Y bounds: [camera.y - top, camera.y + top]
-         this.manager.camera.position.set(right - 4, top - 2, 20);
-         this.manager.camera.zoom = 1;
-         this.manager.camera.updateProjectionMatrix();
+         const cam = this.manager.camera;
+         const w = cam.right - cam.left;
+         const h = cam.top - cam.bottom;
+         
+         cam.position.set(0, 0, 20); // Reset position temporarily to origin centered
+         cam.zoom = 1;
+         
+         // Move origin so it looks like bottom left
+         cam.position.x = w / 2 - 2;
+         cam.position.y = h / 2 - 2;
+         cam.updateProjectionMatrix();
      }
   }
 
@@ -138,23 +141,47 @@ export class CrashGame {
      
      // Update rocket rotation slightly based on derivative if we wanted, but static 45deg is fine
      
-     // Camera follow logic
+     // Calculate orientation (rocket's nose points to tangent)
+     let angle = Math.PI / 4; // Default starting angle facing up-right
+     if (this.points.length > 1) {
+         const prev = this.points[this.points.length - 2];
+         angle = Math.atan2(currentPos.y - prev.y, currentPos.x - prev.x);
+     }
+     
+     // The raw rocket emoji image naturally points to top-right (angle PI/4).
+     // Since sprite material rotation is in radians counter-clockwise around center:
+     const targetRotation = angle - Math.PI / 4;
+     this.rocket.material.rotation = targetRotation;
+     
+     // Camera dynamic scaling / zooming logic
      if (this.manager.camera instanceof THREE.OrthographicCamera) {
-         let didChange = false;
+         const cam = this.manager.camera;
+         const w = cam.right - cam.left;
+         const h = cam.top - cam.bottom;
          
-         // Keep rocket from going past the center of the screen
-         if (x > this.manager.camera.position.x - 2) {
-             this.manager.camera.position.x += (x - (this.manager.camera.position.x - 2)) * 0.1;
-             didChange = true;
-         }
-         if (y > this.manager.camera.position.y - 2) {
-             this.manager.camera.position.y += (y - (this.manager.camera.position.y - 2)) * 0.1;
-             didChange = true;
-         }
+         // We want the rocket to stay within ~70% of the visible un-zoomed frustum
+         const paddingX = 4;
+         const paddingY = 4;
+         const targetZoomX = (w * 0.7) / Math.max(x + paddingX, w * 0.7);
+         const targetZoomY = (h * 0.7) / Math.max(y + paddingY, h * 0.7);
          
-         if (didChange) {
-             this.manager.camera.updateProjectionMatrix();
-         }
+         const targetZoom = Math.min(1.0, targetZoomX, targetZoomY);
+         
+         // Smooth interpolate
+         cam.zoom += (targetZoom - cam.zoom) * 0.05;
+         
+         // Now pan the camera so the point (0,0) stays at the bottom-left of the zoomed area
+         const visibleW = w / cam.zoom;
+         const visibleH = h / cam.zoom;
+         
+         // Let's say bottom-left is exactly -2, -2 padding inside view
+         const targetPosX = -2 + (visibleW / 2);
+         const targetPosY = -2 + (visibleH / 2);
+         
+         cam.position.x = targetPosX;
+         cam.position.y = targetPosY;
+         
+         cam.updateProjectionMatrix();
      }
   }
 
