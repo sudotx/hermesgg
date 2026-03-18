@@ -9,7 +9,7 @@ interface GameCanvasProps {
 
 export function GameCanvas({ onSceneInit, className, cameraType = 'perspective' }: GameCanvasProps) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const managerRef = useRef<SceneManager>(null);
+  const managerRef = useRef<SceneManager | null>(null);
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -28,7 +28,8 @@ export function GameCanvas({ onSceneInit, className, cameraType = 'perspective' 
       manager.dispose();
       managerRef.current = null;
     };
-  }, [onSceneInit, cameraType]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return <div ref={containerRef} className={`w-full h-full relative overflow-hidden ${className || ''}`} />;
 }

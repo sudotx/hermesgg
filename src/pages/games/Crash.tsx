@@ -25,21 +25,20 @@ const Crash = () => {
 	const [betMode, setBetMode] = useState<"manual" | "auto">("manual");
 	const [betAmount, setBetAmount] = useState("10.00");
 	const [autoCashout, setAutoCashout] = useState("2.00");
-	
-	// Game phases: 
-	// "idle" -> betting window
-	// "starting" -> short delay before launch (no bets)
-	// "running" -> rocket is flying
-	// "crashed" -> boom
+
 	const [gameStatus, setGameStatus] = useState<"idle" | "starting" | "running" | "crashed">("idle");
-	const [countdown, setCountdown] = useState(5.0); // 5 second betting window
-	
+	const [countdown, setCountdown] = useState(5.0);
+
+	// Throttled multiplier for UI (not every frame)
 	const [currentMultiplier, setCurrentMultiplier] = useState(1.0);
-	const [crashPoint, setCrashPoint] = useState<number | null>(null);
 	const [hasCashedOut, setHasCashedOut] = useState(false);
-	
+
 	const gameRef = useRef<CrashGame | null>(null);
-	const timePassedRef = useRef<number>(0);
+
+	// Refs for throttling and persistence
+	const currentMultiplierRef = useRef(1.0);
+	const lastMultiplierUpdateRef = useRef(0);
+	const countdownRef = useRef(5.0);
 
 	const handleHalfBet = () => setBetAmount((prev) => (parseFloat(prev || "0") / 2).toFixed(2));
 	const handleDoubleBet = () => setBetAmount((prev) => (parseFloat(prev || "0") * 2).toFixed(2));
@@ -48,6 +47,28 @@ const Crash = () => {
 
 	const handleSceneInit = (manager: SceneManager) => {
 		const game = new CrashGame(manager);
+		
+		// Wire up game callbacks
+		game.onStateChange = (state) => {
+			if (state === 'crashed') {
+				setGameStatus('crashed');
+			}
+		};
+		
+		game.onMultiplier = (mult) => {
+			currentMultiplierRef.current = mult;
+			const now = performance.now();
+			// Throttle: update React state only if delta > 0.02 or 100ms elapsed
+			if (Math.abs(mult - currentMultiplier) > 0.02 || (now - lastMultiplierUpdateRef.current) > 100) {
+				setCurrentMultiplier(mult);
+				lastMultiplierUpdateRef.current = now;
+			}
+		};
+		
+		game.onCrash = () => {
+			setCurrentMultiplier(game.getCrashPoint());
+		};
+		
 		gameRef.current = game;
 	};
 
@@ -59,90 +80,61 @@ const Crash = () => {
 	};
 
 	const handleCashout = () => {
-		if (gameStatus === "running" && !hasCashedOut) {
+		if (gameStatus === "running" && !hasCashedOut && hasPlacedBet) {
 			setHasCashedOut(true);
 			console.log(`Cashed out at ${currentMultiplier.toFixed(2)}x. Payout: ${(parseFloat(betAmount) * currentMultiplier).toFixed(2)}`);
 		}
 	};
 
-	// Game State Machine
+	// Game State Machine - simplified, no RAF loop
 	useEffect(() => {
 		let timer: NodeJS.Timeout;
-		let reqId: number;
-		let lastTime = performance.now();
 
 		if (gameStatus === "idle") {
 			// Phase 1: Betting Window
-			setCountdown(5.0); // 5 seconds to bet
+			countdownRef.current = 5.0;
+			setCountdown(5.0);
+			
 			const tick = () => {
-				setCountdown((prev) => {
-					if (prev <= 0.1) {
-						setGameStatus("starting");
-						return 0;
-					}
-					return prev - 0.1;
-				});
+				countdownRef.current -= 0.1;
+				setCountdown(countdownRef.current);
+				
+				if (countdownRef.current <= 0.1) {
+					setGameStatus("starting");
+					return;
+				}
 				timer = setTimeout(tick, 100);
 			};
 			timer = setTimeout(tick, 100);
+			
 		} else if (gameStatus === "starting") {
-			// Phase 2: Round Start
-			// Server determines crash point here (mocked)
-			// crash = floor( (100 * (1 - houseEdge)) / (1 - r) ) / 100
-			const r = Math.random();
-			const houseEdge = 0.01;
-			const calculatedCrash = Math.floor((100 * (1 - houseEdge)) / (1 - r)) / 100;
-			// Cap it for the sake of the mock so it doesn't run forever
-			const finalCrash = Math.min(Math.max(calculatedCrash, 1.00), 100.0);
-			setCrashPoint(finalCrash);
-			
+			// Phase 2: Round Start - game logic handles crash point internally
 			setCurrentMultiplier(1.0);
+			currentMultiplierRef.current = 1.0;
 			setHasCashedOut(false);
-			timePassedRef.current = 0;
 			gameRef.current?.reset();
-			
+
 			timer = setTimeout(() => {
 				setGameStatus("running");
-			}, 1000); // 1s pause before launch
+			}, 1000);
+			
 		} else if (gameStatus === "running") {
-			// Phase 3: Multiplier Growth
-			const loop = (time: number) => {
-				const dt = (time - lastTime) / 1000;
-				lastTime = time;
-				
-				timePassedRef.current += dt;
-				// Exponential growth math model: multiplier = e^(k * time)
-				// Let's pick k=0.06 so it takes ~11s to hit 2x, ~25s to hit 4x etc.
-				const k = 0.08; 
-				const newMultiplier = Math.exp(k * timePassedRef.current);
-				
-				if (crashPoint && newMultiplier >= crashPoint) {
-					setGameStatus("crashed");
-					setCurrentMultiplier(crashPoint);
-					gameRef.current?.addPoint(timePassedRef.current, crashPoint);
-					gameRef.current?.turnRed();
-					return;
-				}
-				
-				setCurrentMultiplier(newMultiplier);
-				gameRef.current?.addPoint(timePassedRef.current, newMultiplier);
-				gameRef.current?.update(dt);
-				
-				reqId = requestAnimationFrame(loop);
-			};
-			reqId = requestAnimationFrame(loop);
+			// Phase 3: Let CrashGame drive everything
+			gameRef.current?.start();
 		}
 
 		return () => {
 			clearTimeout(timer);
-			cancelAnimationFrame(reqId);
 		};
-	}, [gameStatus, crashPoint]);
+	}, [gameStatus]);
 
 	// Effect for auto-cashout
 	useEffect(() => {
-		if (gameStatus === "running" && betMode === "auto" && !hasCashedOut && autoCashout && currentMultiplier >= parseFloat(autoCashout)) {
-			handleCashout();
+		if (gameStatus === "running" && betMode === "auto" && !hasCashedOut && autoCashout) {
+			const target = parseFloat(autoCashout);
+			if (currentMultiplier >= target) {
+				handleCashout();
+			}
 		}
 	}, [currentMultiplier, gameStatus, autoCashout, hasCashedOut, betMode]);
 
@@ -157,7 +149,8 @@ const Crash = () => {
 		}
 	}, [gameStatus]);
 
-	const isBettingLocked = gameStatus !== "idle" && gameStatus !== "crashed";
+	// Betting locked during starting and running (NOT during crashed - allow early bet)
+	const isBettingLocked = gameStatus !== "idle";
 	const [hasPlacedBet, setHasPlacedBet] = useState(false);
 
 	const mainButtonText = () => {
@@ -173,7 +166,7 @@ const Crash = () => {
 	};
 
 	const mainButtonAction = gameStatus === "running" && hasPlacedBet ? handleCashout : handlePlaceBet;
-	const isMainButtonDisabled = (gameStatus === "idle" && hasPlacedBet) || gameStatus === "starting" || gameStatus === "crashed" || (gameStatus === "running" && (hasCashedOut || !hasPlacedBet));
+	const isMainButtonDisabled = (gameStatus === "idle" && hasPlacedBet) || gameStatus === "starting" || (gameStatus === "running" && (hasCashedOut || !hasPlacedBet)) || gameStatus === "crashed";
 
 	return (
 		<div className="flex flex-col min-h-screen bg-[#0F1115] text-white">
@@ -261,7 +254,7 @@ const Crash = () => {
 									"bg-blue-500 hover:bg-blue-400 text-white shadow-blue-500/20": gameStatus === "running" && !hasCashedOut,
 									"bg-[#2A303C] text-gray-400": gameStatus === "running" && hasCashedOut,
 									"bg-red-500 text-white shadow-red-500/20": gameStatus === "crashed",
-									"opacity-50 cursor-not-allowed transform-none": isMainButtonDisabled && gameStatus !== "crashed",
+									"opacity-50 cursor-not-allowed transform-none": isMainButtonDisabled,
 								})}
 							>
 								{mainButtonText()}
@@ -280,18 +273,17 @@ const Crash = () => {
 					{/* Center Panel - ThreeJS Game Visualization */}
 					<div className="flex-1 flex flex-col relative">
 						<div className="w-full h-full bg-[#1A1D24] rounded-2xl relative overflow-hidden border border-gray-800/50 shadow-2xl">
-						
+
 						{/* 3D Canvas */}
 						<GameCanvas onSceneInit={handleSceneInit} cameraType="orthographic" className="absolute inset-0" />
 
 						{/* Y-Axis Chart Overlay (Right Side) */}
 						<div className="absolute right-0 top-0 bottom-0 w-16 pointer-events-none flex flex-col justify-between py-10 opacity-40">
 							{[5, 4, 3, 2, 1].map((val, i) => {
-								// Dynamically scale Y-axis labels based on current multiplier so we don't just see a static grid
 								const highestScale = Math.max(5, Math.ceil(currentMultiplier + 1));
 								const step = highestScale / 5;
 								const labelValue = (step * val).toFixed(2);
-								
+
 								return (
 								<div key={i} className="flex relative items-center justify-end pr-2 text-xs font-mono text-gray-500">
 									<div className="absolute left-0 right-8 border-t border-dashed border-gray-600"></div>
@@ -313,11 +305,15 @@ const Crash = () => {
 							</div>
 						</div>
 
-						{/* Center Display: Multiplier / Preparing */}
+						{/* Center Display: Multiplier / Preparing Round */}
 						<div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
 							{gameStatus === "idle" || gameStatus === "starting" ? (
 								<div className="text-center flex flex-col items-center">
-									<h1 className="text-5xl md:text-6xl font-black text-white tracking-tight drop-shadow-md">
+									{/* Keep multiplier visible but dimmed during prep */}
+									<div className="text-5xl md:text-6xl font-black text-white/30 tracking-tight mb-4">
+										{currentMultiplier.toFixed(2)}x
+									</div>
+									<h1 className="text-4xl md:text-5xl font-black text-white tracking-tight drop-shadow-md">
 										Preparing Round
 									</h1>
 									<p className="text-xl font-bold text-yellow-400 mt-2">

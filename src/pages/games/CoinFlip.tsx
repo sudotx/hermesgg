@@ -31,29 +31,36 @@ const CoinFlip = () => {
 	const handleSceneInit = (manager: SceneManager) => {
 		// A cylinder to represent the coin
 		const geometry = new THREE.CylinderGeometry(4, 4, 0.5, 64);
-		
+
 		// Materials for side, top (heads), bottom (tails)
+		// Optimized for visual appeal - looks expensive, not like a dark mirror
 		const materials = [
-			new THREE.MeshStandardMaterial({ color: 0xffaa00, metalness: 0.9, roughness: 0.1 }), // edge
-			new THREE.MeshStandardMaterial({ color: 0xffcc00, metalness: 1, roughness: 0.2 }),   // heads
-			new THREE.MeshStandardMaterial({ color: 0x888888, metalness: 1, roughness: 0.2 })    // tails (silver)
+			new THREE.MeshStandardMaterial({ color: 0xffaa00, metalness: 0.6, roughness: 0.4 }), // edge
+			new THREE.MeshStandardMaterial({ color: 0xffd700, metalness: 0.6, roughness: 0.4 }),   // heads (proper gold)
+			new THREE.MeshStandardMaterial({ color: 0xc0c0c0, metalness: 0.5, roughness: 0.4 })    // tails (proper silver)
 		];
 
 		const coin = new THREE.Mesh(geometry, materials);
-		
+
 		// Default orientation: Heads facing camera (+Z axis)
 		coin.rotation.x = Math.PI / 2;
 		manager.scene.add(coin);
 		coinRef.current = coin;
 
-		// Add some nice glowing lights focused on the coin
-		const frontLight = new THREE.PointLight(0xffddaa, 3, 50);
-		frontLight.position.set(0, 5, 10);
-		manager.scene.add(frontLight);
+		// Studio lighting setup - makes the coin look expensive
+		// Key light (main, bright)
+		const keyLight = new THREE.DirectionalLight(0xffffff, 2.5);
+		keyLight.position.set(5, 10, 7);
+		manager.scene.add(keyLight);
 
-		const backLight = new THREE.PointLight(0xaaddff, 2, 50);
-		backLight.position.set(0, -5, -10);
-		manager.scene.add(backLight);
+		// Fill light (soft, reduces harsh shadows)
+		const fillLight = new THREE.DirectionalLight(0xffffff, 1.0);
+		fillLight.position.set(-5, 5, -5);
+		manager.scene.add(fillLight);
+
+		// Ambient light (base illumination, prevents pure black areas)
+		const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
+		manager.scene.add(ambientLight);
 	};
 
 	const handleFlip = () => {
@@ -216,7 +223,7 @@ const CoinFlip = () => {
 
 						{/* ThreeJS Container */}
 						<div className="flex-1 relative w-full h-full">
-							<GameCanvas onSceneInit={handleSceneInit} cameraType="orthographic" className="absolute inset-0 z-0" />
+							<GameCanvas onSceneInit={handleSceneInit} cameraType="perspective" className="absolute inset-0 z-0" />
 							
 							{/* UI Overlay over the canvas */}
 							<div className="absolute inset-0 flex items-center justify-between px-24 pointer-events-none z-10">

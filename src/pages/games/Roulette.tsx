@@ -20,6 +20,14 @@ const mockBets = [
 	{ id: 3, game: "Roulette", username: "haargpooolnt", avatar: "👤", bet: "2.1234567", multiplier: "1.5x", payout: "3.1851851" },
 ];
 
+// Standard European roulette order
+const ROULETTE_NUMBERS = [
+	0, 32, 15, 19, 4, 21, 2, 25, 17, 34, 6, 27, 13, 36, 11, 30, 8, 23, 10, 5, 24, 16, 33, 1, 20, 14, 31, 9, 22, 18, 29, 7, 28, 12, 35, 3, 26
+];
+
+// Red numbers for color determination
+const RED_NUMBERS = [1, 3, 5, 7, 9, 12, 14, 16, 18, 19, 21, 23, 25, 27, 30, 32, 34, 36];
+
 const Roulette = () => {
 	const [betAmount, setBetAmount] = useState("10.00");
 	const [selectedColor, setSelectedColor] = useState<"green" | "black" | "red" | null>(null);
@@ -30,6 +38,24 @@ const Roulette = () => {
 
 	const handleSceneInit = (manager: SceneManager) => {
 		const game = new RouletteThreeGame(manager);
+		
+		// Wire up spin end callback - UI syncs to actual animation completion
+		game.onSpinEnd = (result) => {
+			setIsSpinning(false);
+			setLastNumbers(prev => [result.number, ...prev].slice(0, 10));
+
+			// Determine color of outcome
+			let outcomeColor: "green" | "black" | "red" = "black";
+			if (result.number === 0) outcomeColor = "green";
+			else if (RED_NUMBERS.includes(result.number)) outcomeColor = "red";
+
+			if (outcomeColor === selectedColor) {
+				console.log("Won! Bet color matched outcome.");
+			} else {
+				console.log("Lost! Outcome was", outcomeColor);
+			}
+		};
+		
 		gameRef.current = game;
 	};
 
@@ -37,40 +63,19 @@ const Roulette = () => {
 		if (isSpinning || !selectedColor) return;
 		setIsSpinning(true);
 
-		// Backend logic simulates roll
-		const ROULETTE_NUMBERS = [
-			0, 32, 15, 19, 4, 21, 2, 25, 17, 34, 6, 27, 13, 36, 11, 30, 8, 23, 10, 5, 24, 16, 33, 1, 20, 14, 31, 9, 22, 18, 29, 7, 28, 12, 35, 3, 26
-		];
-		
-		// Random target slot
-		const randomIdx = Math.floor(Math.random() * 37);
-		const targetNumber = ROULETTE_NUMBERS[randomIdx];
+		// Generate random target index (in production, this comes from smart contract)
+		const targetIndex = Math.floor(Math.random() * 37);
+		const targetNumber = ROULETTE_NUMBERS[targetIndex];
 
-		gameRef.current?.spin(targetNumber);
+		// Pass index to game (not number) for consistent mapping
+		gameRef.current?.spin(targetIndex);
 
-		// Animation simulation time (approx 6 seconds based on our physics logic)
-		setTimeout(() => {
-			setIsSpinning(false);
-			setLastNumbers(prev => [...prev, targetNumber].slice(-10)); // Keep last 10
-			
-			// Determine color of outcome
-			let outcomeColor = "black";
-			if (targetNumber === 0) outcomeColor = "green";
-			else if ([1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36].includes(targetNumber)) outcomeColor = "red";
-
-			if (outcomeColor === selectedColor) {
-				console.log("Won! Bet color matched outcome.");
-			} else {
-				console.log("Lost! Outcome was", outcomeColor);
-			}
-
-		}, 7000);
+		console.log(`Spinning... target: ${targetNumber} (index: ${targetIndex})`);
 	};
 
 	const getColorStyles = (num: number) => {
 		if (num === 0) return 'bg-green-600';
-		const reds = [1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36];
-		return reds.includes(num) ? 'bg-red-600' : 'bg-gray-800';
+		return RED_NUMBERS.includes(num) ? 'bg-red-600' : 'bg-gray-800';
 	};
 
 	return (
@@ -127,7 +132,7 @@ const Roulette = () => {
 								<div className="grid grid-cols-3 gap-2">
 									<button
 										disabled={isSpinning}
-										className={cn("px-2 py-4 rounded-xl text-sm font-bold transition-all border disabled:opacity-50 flex flex-col items-center", 
+										className={cn("px-2 py-4 rounded-xl text-sm font-bold transition-all border disabled:opacity-50 flex flex-col items-center",
 											selectedColor === "red" ? "bg-red-500/10 border-red-500/50 text-red-500 shadow-[0_0_15px_rgba(239,68,68,0.15)]" : "bg-[#252A36] border-transparent text-gray-400 hover:bg-[#2A303C]"
 										)}
 										onClick={() => setSelectedColor("red")}
@@ -137,7 +142,7 @@ const Roulette = () => {
 									</button>
 									<button
 										disabled={isSpinning}
-										className={cn("px-2 py-4 rounded-xl text-sm font-bold transition-all border disabled:opacity-50 flex flex-col items-center", 
+										className={cn("px-2 py-4 rounded-xl text-sm font-bold transition-all border disabled:opacity-50 flex flex-col items-center",
 											selectedColor === "green" ? "bg-green-500/10 border-green-500/50 text-green-500 shadow-[0_0_15px_rgba(34,197,94,0.15)]" : "bg-[#252A36] border-transparent text-gray-400 hover:bg-[#2A303C]"
 										)}
 										onClick={() => setSelectedColor("green")}
@@ -147,7 +152,7 @@ const Roulette = () => {
 									</button>
 									<button
 										disabled={isSpinning}
-										className={cn("px-2 py-4 rounded-xl text-sm font-bold transition-all border disabled:opacity-50 flex flex-col items-center", 
+										className={cn("px-2 py-4 rounded-xl text-sm font-bold transition-all border disabled:opacity-50 flex flex-col items-center",
 											selectedColor === "black" ? "bg-gray-400/10 border-gray-400/50 text-white shadow-[0_0_15px_rgba(255,255,255,0.1)]" : "bg-[#252A36] border-transparent text-gray-400 hover:bg-[#2A303C]"
 										)}
 										onClick={() => setSelectedColor("black")}
@@ -158,7 +163,7 @@ const Roulette = () => {
 								</div>
 							</div>
 
-							<button 
+							<button
 								onClick={handlePlaceBet}
 								disabled={isSpinning || !selectedColor}
 								className="w-full bg-yellow-400 hover:bg-yellow-300 text-[#101217] font-black py-4 rounded-xl text-lg transition-all shadow-yellow-400/20 hover:shadow-yellow-400/40 shadow-lg active:scale-[0.98] mt-2 disabled:opacity-50 disabled:cursor-not-allowed"
@@ -179,11 +184,11 @@ const Roulette = () => {
 					{/* Right Panel - ThreeJS Game Visualization */}
 					<div className="flex-1 flex flex-col relative">
 						<div className="w-full h-full bg-[#1A1D24] rounded-2xl relative overflow-hidden border border-gray-800/50 shadow-2xl bg-gradient-to-br from-[#1A1D24] to-[#12141A]">
-						
+
 						{/* Top Section overlays */}
 						<div className="absolute top-6 left-6 right-6 flex justify-between items-center z-10 pointer-events-none">
 							<div className="text-white text-sm font-mono tracking-widest bg-black/50 px-3 py-1 rounded">03498945</div>
-							
+
 							<div className="flex space-x-2">
 								{['Red 2x', 'Black 2x', 'Green 14x'].map((multiplier, index) => (
 									<button key={index} className={`px-4 py-2 rounded-lg text-xs font-bold transition-colors text-white ${multiplier.includes('Red') ? 'bg-red-600' : multiplier.includes('Green') ? 'bg-green-600' : 'bg-gray-800'}`}>
@@ -193,8 +198,8 @@ const Roulette = () => {
 							</div>
 						</div>
 
-						{/* ThreeJS Container */}
-						<GameCanvas onSceneInit={handleSceneInit} cameraType="orthographic" className="absolute inset-0" />
+						{/* ThreeJS Container - Perspective camera for depth */}
+						<GameCanvas onSceneInit={handleSceneInit} cameraType="perspective" className="absolute inset-0" />
 
 						{/* Bottom Section - Last Rolls */}
 						{lastNumbers.length > 0 && (
