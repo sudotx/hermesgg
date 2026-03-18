@@ -61,15 +61,14 @@ export class CrashGame {
         this.line.frustumCulled = false; // Prevent flickering
         this.manager.scene.add(this.line);
 
-        // Rocket Sprite
-        const textureLoader = new THREE.TextureLoader();
-        const rocketTexture = textureLoader.load('https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f680.png');
+        // Rocket Sprite with procedural texture (no external dependencies)
+        const rocketTexture = this.createRocketTexture();
         const rocketMat = new THREE.SpriteMaterial({
             map: rocketTexture,
             color: 0xffffff,
         });
         this.rocket = new THREE.Sprite(rocketMat);
-        this.rocket.scale.set(2.5, 2.5, 1);
+        this.rocket.scale.set(1.5, 1.5, 1);
         this.rocket.position.set(0, 0, 0);
         this.manager.scene.add(this.rocket);
 
@@ -116,7 +115,62 @@ export class CrashGame {
         this.particles = new THREE.Points(pGeo, pMat);
         this.manager.scene.add(this.particles);
 
+        // Register update loop with SceneManager
+        this.manager.addUpdateable(this.update);
+
         this.reset();
+    }
+
+    private createRocketTexture(): THREE.CanvasTexture {
+        const canvas = document.createElement('canvas');
+        canvas.width = 64;
+        canvas.height = 64;
+        const ctx = canvas.getContext('2d');
+
+        if (ctx) {
+            // Rocket body (pointing up-right at 45 degrees)
+            ctx.translate(32, 32);
+            ctx.rotate(-Math.PI / 4); // Point toward top-right
+
+            // Main body
+            ctx.fillStyle = '#ffffff';
+            ctx.beginPath();
+            ctx.ellipse(0, 0, 20, 8, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Nose cone
+            ctx.fillStyle = '#ff4444';
+            ctx.beginPath();
+            ctx.moveTo(15, 0);
+            ctx.lineTo(28, 0);
+            ctx.lineTo(15, 5);
+            ctx.lineTo(15, -5);
+            ctx.closePath();
+            ctx.fill();
+
+            // Fins
+            ctx.fillStyle = '#ff6600';
+            ctx.beginPath();
+            ctx.moveTo(-10, 5);
+            ctx.lineTo(-20, 12);
+            ctx.lineTo(-5, 5);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.moveTo(-10, -5);
+            ctx.lineTo(-20, -12);
+            ctx.lineTo(-5, -5);
+            ctx.fill();
+
+            // Engine glow
+            ctx.fillStyle = '#ffaa00';
+            ctx.beginPath();
+            ctx.arc(-18, 0, 6, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        const texture = new THREE.CanvasTexture(canvas);
+        texture.needsUpdate = true;
+        return texture;
     }
 
     public reset() {
@@ -142,22 +196,26 @@ export class CrashGame {
         this.anticipationActive = false;
         this.shakeOffset.set(0, 0, 0);
 
-        // Fixed camera setup - no zoom, consistent scale
+        // Fixed camera setup for orthographic view
+        // Chart shows: X = 0 to 20 seconds, Y = 0 to 10x multiplier
         if (this.manager.camera instanceof THREE.OrthographicCamera) {
             const cam = this.manager.camera;
-            const aspect = (cam.right - cam.left) / (cam.top - cam.bottom);
-
-            // Set up fixed view: show 0-20s on X, 0-10x on Y
-            const viewHeight = 12;
-            const viewWidth = viewHeight * aspect;
-
-            cam.left = -2;
-            cam.right = viewWidth;
-            cam.bottom = -1;
-            cam.top = viewHeight;
-            cam.position.set(viewWidth * 0.5, viewHeight * 0.5, 10);
+            
+            // Set bounds to show the full chart area with some padding
+            cam.left = -1;
+            cam.right = 22;      // 20 seconds + padding
+            cam.bottom = -1;     
+            cam.top = 12;        // 10x multiplier + padding
             cam.zoom = 1;
             cam.updateProjectionMatrix();
+            
+            // Position camera at center of view and look at scene
+            cam.position.set(
+                (cam.left + cam.right) / 2,
+                (cam.bottom + cam.top) / 2,
+                10
+            );
+            cam.lookAt(0, 0, 0);
         }
     }
 
@@ -359,6 +417,8 @@ export class CrashGame {
     }
 
     public dispose() {
+        this.manager.removeUpdateable(this.update);
+        
         this.manager.scene.remove(this.line);
         this.manager.scene.remove(this.rocket);
         this.manager.scene.remove(this.particles);

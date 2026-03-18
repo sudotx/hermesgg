@@ -34,6 +34,7 @@ const Crash = () => {
 	const [hasCashedOut, setHasCashedOut] = useState(false);
 
 	const gameRef = useRef<CrashGame | null>(null);
+	const roundStartedRef = useRef(false);
 
 	// Refs for throttling and persistence
 	const currentMultiplierRef = useRef(1.0);
@@ -94,11 +95,12 @@ const Crash = () => {
 			// Phase 1: Betting Window
 			countdownRef.current = 5.0;
 			setCountdown(5.0);
-			
+			roundStartedRef.current = false;
+
 			const tick = () => {
 				countdownRef.current -= 0.1;
 				setCountdown(countdownRef.current);
-				
+
 				if (countdownRef.current <= 0.1) {
 					setGameStatus("starting");
 					return;
@@ -106,7 +108,7 @@ const Crash = () => {
 				timer = setTimeout(tick, 100);
 			};
 			timer = setTimeout(tick, 100);
-			
+
 		} else if (gameStatus === "starting") {
 			// Phase 2: Round Start - game logic handles crash point internally
 			setCurrentMultiplier(1.0);
@@ -117,10 +119,13 @@ const Crash = () => {
 			timer = setTimeout(() => {
 				setGameStatus("running");
 			}, 1000);
-			
+
 		} else if (gameStatus === "running") {
-			// Phase 3: Let CrashGame drive everything
-			gameRef.current?.start();
+			// Phase 3: Let CrashGame drive everything - only start once per round
+			if (!roundStartedRef.current) {
+				roundStartedRef.current = true;
+				gameRef.current?.start();
+			}
 		}
 
 		return () => {
@@ -144,6 +149,7 @@ const Crash = () => {
 			const timeout = setTimeout(() => {
 				setGameStatus("idle");
 				setHasPlacedBet(false);
+				roundStartedRef.current = false;
 			}, 3000);
 			return () => clearTimeout(timeout);
 		}
