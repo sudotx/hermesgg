@@ -29,6 +29,7 @@ const Plinko = () => {
 	const [difficulty, setDifficulty] = useState<Difficulty>("easy");
 	const [rows, setRows] = useState(8);
 	const [isBetting, setIsBetting] = useState(false);
+	const [lastResult, setLastResult] = useState<{ multiplier: string; payout: number } | null>(null);
 
 	const physicsManagerRef = useRef<PhysicsManager>(new PhysicsManager());
 	const gameRef = useRef<PlinkoGame | null>(null);
@@ -36,10 +37,18 @@ const Plinko = () => {
 	const handleSceneInit = async (manager: SceneManager) => {
 		const pm = physicsManagerRef.current;
 		await pm.init();
-		
+
 		const game = new PlinkoGame(manager, pm);
-		gameRef.current = game;
 		
+		// Wire up ball land callback
+		game.onBallLand = (result) => {
+			setLastResult({ multiplier: result.multiplier, payout: result.payout });
+			setIsBetting(false);
+			console.log(`Ball landed! Multiplier: ${result.multiplier}, Payout: ${result.payout}x`);
+		};
+		
+		gameRef.current = game;
+
 		await game.buildBoard(rows);
 	};
 
@@ -55,17 +64,15 @@ const Plinko = () => {
 	const handlePlaceBet = () => {
 		if (isBetting) return;
 		setIsBetting(true);
-		
+		setLastResult(null); // Clear previous result
+
 		// Backend simulates outcome (0 = left, 1 = right bounce)
 		const path: number[] = [];
 		for(let i=0; i<rows; i++) {
 			path.push(Math.random() > 0.5 ? 1 : 0);
 		}
-		
-		gameRef.current?.dropBall(path);
 
-		// Re-enable betting quickly so user can drop multiple balls
-		setTimeout(() => setIsBetting(false), 200);
+		gameRef.current?.dropBall(path);
 	};
 
 	const multipliersMap: Record<number, {value: string, color: string}[]> = {
@@ -204,6 +211,11 @@ const Plinko = () => {
 						{/* Top Section */}
 						<div className="absolute top-6 left-6 right-6 flex justify-between items-center z-10 pointer-events-none">
 							<div className="text-white text-sm font-mono">03498945</div>
+							{lastResult && (
+								<div className="px-4 py-2 bg-green-500/90 rounded-lg text-white text-sm font-bold animate-pulse">
+									Landed: {lastResult.multiplier}
+								</div>
+							)}
 							<button className="flex items-center space-x-2 px-4 py-2 bg-neutral-800/80 rounded-md text-white text-sm pointer-events-auto hover:bg-neutral-700 transition">
 								<svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
 									<path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z" />

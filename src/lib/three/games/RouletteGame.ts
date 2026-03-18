@@ -164,6 +164,9 @@ export class RouletteGame {
       this.manager.camera.lookAt(0, 0, 0);
     }
 
+    // Register update loop with SceneManager
+    this.manager.addUpdateable(this.update);
+
     this.reset();
   }
 

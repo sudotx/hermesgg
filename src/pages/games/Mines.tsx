@@ -36,6 +36,7 @@ const Mines = () => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [multiplier, setMultiplier] = useState(1.0);
   const [revealedCount, setRevealedCount] = useState(0);
+  const [showFlash, setShowFlash] = useState(false);
 
   const gameRef = useRef<MinesThreeGame | null>(null);
   
@@ -57,6 +58,12 @@ const Mines = () => {
       game.setOnClick((idx) => {
           handleTileClick(idx);
       });
+      
+      // Screen flash on mine hit
+      game.onMineHit = () => {
+          setShowFlash(true);
+          setTimeout(() => setShowFlash(false), 150);
+      };
   };
 
   const handleTileClick = (idx: number) => {
@@ -238,6 +245,11 @@ const Mines = () => {
 
                           {/* ThreeJS Container */}
                           <GameCanvas onSceneInit={handleSceneInit} cameraType="perspective" className="absolute inset-0 cursor-pointer" />
+
+                          {/* Screen Flash Overlay - Mine Hit Effect */}
+                          {showFlash && (
+                              <div className="absolute inset-0 bg-red-500/40 z-50 pointer-events-none animate-pulse" />
+                          )}
 
                           {/* Bottom Multipliers Overlay */}
                           <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 flex space-x-2 pointer-events-none">

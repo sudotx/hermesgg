@@ -39,7 +39,7 @@ const Dice = () => {
 
 		// Backend generates outcome
 		const outcome = Math.floor(Math.random() * 6) + 1;
-		
+
 		gameRef.current?.roll(outcome);
 
 		// Roll animation takes 2.0s in DiceGame class
@@ -139,8 +139,8 @@ const Dice = () => {
 											disabled={isRolling}
 											className={cn(
 												"h-12 rounded-xl flex items-center justify-center p-1 transition-all border",
-												selectedDice === dice 
-													? "bg-green-500/10 border-green-500/50 shadow-[0_0_15px_rgba(34,197,94,0.15)]" 
+												selectedDice === dice
+													? "bg-green-500/10 border-green-500/50 shadow-[0_0_15px_rgba(34,197,94,0.15)]"
 													: "bg-[#252A36] border-transparent hover:bg-[#2A303C]",
 												isRolling && "opacity-50 cursor-not-allowed transform-none"
 											)}
@@ -156,7 +156,7 @@ const Dice = () => {
 								</div>
 							</div>
 
-							<button 
+							<button
 								className="w-full bg-yellow-400 hover:bg-yellow-300 text-[#101217] font-black py-4 rounded-xl text-lg transition-all shadow-yellow-400/20 hover:shadow-yellow-400/40 shadow-lg active:scale-[0.98] mt-2 disabled:opacity-50 disabled:cursor-not-allowed"
 								onClick={handlePlay}
 								disabled={isRolling}
@@ -177,56 +177,49 @@ const Dice = () => {
 					{/* Right Panel - 3D Dice Visualization */}
 					<div className="flex-1 flex flex-col relative">
 						<div className="w-full h-full bg-[#1A1D24] rounded-2xl relative overflow-hidden border border-gray-800/50 shadow-2xl bg-gradient-to-br from-[#1A1D24] to-[#12141A]">
-						
-						{/* Top Section */}
-						<div className="absolute top-6 left-6 right-6 flex justify-between items-center z-10 pointer-events-none">
-							<div className="text-white text-sm font-mono tracking-widest bg-black/40 px-3 py-1 rounded">03498945</div>
-							<button className="flex items-center space-x-2 px-4 py-2 bg-black/30 rounded-md text-white text-sm pointer-events-auto hover:bg-black/50 transition">
-								<svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-									<path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z" />
-								</svg>
-								<span>Statistics</span>
-							</button>
-						</div>
 
-						{/* 3D Canvas */}
-						<GameCanvas onSceneInit={handleSceneInit} cameraType="perspective" className="absolute inset-0" />
-
-						{/* Center Decor text on top of canvas if needed */}
-						<div className="absolute inset-0 flex items-start justify-center pt-24 pointer-events-none z-10">
-							<div className="text-center opacity-30">
-								<div className="text-white text-7xl font-black tracking-widest uppercase">Roll</div>
+							{/* Top Section */}
+							<div className="absolute top-6 left-6 right-6 flex justify-between items-center z-10 pointer-events-none">
+								<div className="text-white text-sm font-mono tracking-widest bg-black/40 px-3 py-1 rounded">03498945</div>
+								<button className="flex items-center space-x-2 px-4 py-2 bg-black/30 rounded-md text-white text-sm pointer-events-auto hover:bg-black/50 transition">
+									<svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+										<path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z" />
+									</svg>
+									<span>Statistics</span>
+								</button>
 							</div>
-						</div>
 
-						{/* Bottom Section - Last Rolls */}
-						<div className="absolute bottom-6 left-6 right-6 px-4">
-							<div className="flex items-center bg-black/40 p-3 rounded-xl backdrop-blur-md border border-white/5 space-x-4">
-								<span className="text-white/70 text-sm font-semibold whitespace-nowrap uppercase tracking-wider">History:</span>
-								<div className="flex items-center space-x-2 overflow-x-auto pb-1 scrollbar-hide flex-1">
-									{rollHistory.map((val, index) => (
-										<div 
-											key={index} 
-											className={cn(
-												"w-8 h-8 rounded bg-white relative flex-shrink-0 shadow-lg transition-all",
-												index === rollHistory.length - 1 ? "ring-2 ring-green-500 scale-110 ml-2" : "opacity-80"
-											)}
-										>
-											{renderMiniHistoryDice(val)}
-										</div>
-									))}
+							{/* 3D Canvas */}
+							<GameCanvas onSceneInit={handleSceneInit} cameraType="perspective" className="absolute inset-0" />
+
+							{/* Bottom Section - Last Rolls */}
+							<div className="absolute bottom-6 left-6 right-6 px-4">
+								<div className="flex items-center bg-black/40 p-3 rounded-xl backdrop-blur-md border border-white/5 space-x-4">
+									<span className="text-white/70 text-sm font-semibold whitespace-nowrap uppercase tracking-wider">History:</span>
+									<div className="flex items-center space-x-2 overflow-x-auto pb-1 scrollbar-hide flex-1">
+										{rollHistory.map((val, index) => (
+											<div
+												key={index}
+												className={cn(
+													"w-8 h-8 rounded bg-white relative flex-shrink-0 shadow-lg transition-all",
+													index === rollHistory.length - 1 ? "ring-2 ring-green-500 scale-110 ml-2" : "opacity-80"
+												)}
+											>
+												{renderMiniHistoryDice(val)}
+											</div>
+										))}
+									</div>
 								</div>
 							</div>
 						</div>
 					</div>
 				</div>
-			</div>
 
-			{/* Bottom Section: Bets List */}
-			<div className="w-full max-w-[1500px] mx-auto px-4 md:px-6 pb-6 mt-4">
-				<BetsList bets={mockBets} />
+				{/* Bottom Section: Bets List */}
+				<div className="w-full max-w-[1500px] mx-auto px-4 md:px-6 pb-6 mt-4">
+					<BetsList bets={mockBets} />
+				</div>
 			</div>
-		</div>
 		</div>
 	);
 };
